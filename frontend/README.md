@@ -1,5 +1,33 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Running this project
+
+Some projects on this site (like the Kanban board) fetch data from the Python
+backend in `../backend`. To see everything working, run both servers at once,
+in two separate terminals:
+
+**Terminal 1 — backend**
+
+```bash
+cd ../backend
+source .venv/bin/activate
+uvicorn main:app --reload --port 8000
+```
+
+See `../backend/README.md` if you haven't set up the virtual environment yet.
+
+**Terminal 2 — frontend**
+
+```bash
+npm run dev
+```
+
+Then open [http://localhost:3000](http://localhost:3000).
+
+If the backend isn't running, the frontend still loads, but any project that
+depends on it (e.g. the Kanban board) will show a "could not reach the
+backend" error instead of its data.
+
 ## Getting Started
 
 First, run the development server:
