@@ -1,33 +1,76 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState, type MouseEvent } from "react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function Navbar() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
+
+  useEffect(() => {
+    function onScroll() {
+      setIsScrolled(window.scrollY > 24);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  function handleContactClick(e: MouseEvent<HTMLAnchorElement>) {
+    // If we're already on "/", the URL hash won't change on a repeat click
+    // (e.g. after scrolling back up), so the browser never re-fires the
+    // hash-scroll. Scroll manually instead of relying on that.
+    if (window.location.pathname !== "/") return;
+    e.preventDefault();
+    document
+      .getElementById("contact")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
-    <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-black/80">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 sm:px-16">
+    <div className="sticky top-0 z-10 flex justify-center px-4 pt-4">
+      <header
+        className={`flex w-full items-center justify-between rounded-full border border-border bg-background/80 shadow-sm backdrop-blur transition-all duration-300 ${
+          isScrolled ? "max-w-2xl px-4 py-2" : "max-w-3xl px-6 py-3"
+        }`}
+      >
         <Link
           href="/"
-          className="flex items-center gap-2 text-base font-semibold text-zinc-900 dark:text-zinc-50"
+          className="font-serif text-lg font-semibold text-foreground"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-sm font-bold text-white">
-            S
-          </span>
-          Site Name
+          Shapo
         </Link>
-        <nav className="flex items-center gap-6 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+        <nav className="flex items-center gap-6 text-sm font-medium text-muted">
+          <Link
+            href="/about"
+            className="rounded-full px-3 py-1.5 transition-colors hover:bg-accent/10 hover:text-accent"
+          >
+            {t("nav.about")}
+          </Link>
+          <Link
+            href="/#contact"
+            onClick={handleContactClick}
+            className="rounded-full px-3 py-1.5 transition-colors hover:bg-accent/10 hover:text-accent"
+          >
+            {t("nav.contact")}
+          </Link>
+          <button
+            type="button"
+            onClick={() => setLanguage(language === "en" ? "sv" : "en")}
+            aria-label={t("nav.switchLanguage")}
+            className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-accent hover:bg-accent/10 hover:text-accent"
+          >
+            {language === "en" ? "SV" : "EN"}
+          </button>
           <Link
             href="/"
-            className="transition-colors hover:text-zinc-900 dark:hover:text-zinc-50"
+            className="rounded-full bg-accent px-4 py-1.5 text-accent-foreground transition-colors hover:bg-accent-hover"
           >
-            Projects
+            {t("nav.home")}
           </Link>
-          <span className="cursor-default opacity-50" title="Placeholder page">
-            About
-          </span>
-          <span className="cursor-default opacity-50" title="Placeholder page">
-            Contact
-          </span>
         </nav>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }

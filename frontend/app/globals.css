@@ -1,26 +1,59 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #18181b;
+  --background: #f7f2e8;
+  --foreground: #1c1a17;
+  --muted: #6b625a;
+  --surface: #f0e9de;
+  --border: #e8dfd0;
+  --accent: #b45f3c;
+  --accent-hover: #9c5030;
+  --accent-foreground: #fdf9f2;
+  --status-todo: #b1544a;
+  --status-progress: #bd8a45;
+  --status-done: #6f8f6a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #f4f4f5;
-  }
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-status-todo: var(--status-todo);
+  --color-status-progress: var(--status-progress);
+  --color-status-done: var(--status-done);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+}
+
+/* Scroll-triggered fade + rise, toggled by the FadeIn component. */
+.fade-in {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.7s ease-out,
+    transform 0.7s ease-out;
+}
+
+.fade-in.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

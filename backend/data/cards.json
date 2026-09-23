@@ -1,0 +1,38 @@
+{
+  "todo": [
+    {
+      "id": "c70c92448fee45da8f00ab5902a13979",
+      "title": "sfdvfs",
+      "priority": "medium"
+    },
+    {
+      "id": "b30b4772dfb5479fa4771928cfa434f3",
+      "title": "hello",
+      "priority": "low"
+    },
+    {
+      "id": "dc92e2215635432e9b237020de1436a1",
+      "title": "asfdv",
+      "priority": "low"
+    }
+  ],
+  "in-progress": [
+    {
+      "id": "fe429f5b59b04de9a7987b4f371fa89b",
+      "title": "hellooooo",
+      "priority": "medium"
+    },
+    {
+      "id": "1",
+      "title": "Drag a card to another column",
+      "priority": "high"
+    }
+  ],
+  "done": [
+    {
+      "id": "1ee231c01c8744e2841e90b22d670aa6",
+      "title": "meow",
+      "priority": "medium"
+    }
+  ]
+}

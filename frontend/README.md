@@ -6,7 +6,7 @@ Some projects on this site (like the Kanban board) fetch data from the Python
 backend in `../backend`. To see everything working, run both servers at once,
 in two separate terminals:
 
-**Terminal 1 — backend**
+**Terminal 1: backend**
 
 ```bash
 cd ../backend
@@ -16,7 +16,7 @@ uvicorn main:app --reload --port 8000
 
 See `../backend/README.md` if you haven't set up the virtual environment yet.
 
-**Terminal 2 — frontend**
+**Terminal 2: frontend**
 
 ```bash
 npm run dev

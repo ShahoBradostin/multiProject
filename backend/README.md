@@ -1,7 +1,8 @@
 # Backend
 
 Python backend for the portfolio, built with FastAPI. Currently serves the Kanban
-board's data, stored in `data/cards.csv`.
+board's data (`data/cards.json`) and the calorie tracker's data
+(`data/food_entries.json`).
 
 ## Setup
 
@@ -23,11 +24,31 @@ at `http://localhost:8000`.
 
 ## API
 
-- `GET /cards` — list all cards
-- `POST /cards` — add a card: `{ "title": string, "columnId": "todo" | "in-progress" | "done" }`
-- `PATCH /cards/{id}` — move a card: `{ "columnId": "todo" | "in-progress" | "done" }`
-- `DELETE /cards/{id}` — delete a card
+- `GET /cards`: list all cards
+- `POST /cards`: add a card: `{ "title": string, "columnId": "todo" | "in-progress" | "done" }`
+- `PATCH /cards/{id}`: move a card: `{ "columnId": "todo" | "in-progress" | "done" }`
+- `DELETE /cards/{id}`: delete a card
 
-Data is persisted to `data/cards.csv` on every write.
+Data is persisted to `data/cards.json` on every write, grouped by column:
 
-Planned next: sessions, cookies, and login information (also CSV-backed for now).
+```json
+{
+  "todo": [{ "id": "1", "title": "..." }],
+  "in-progress": [],
+  "done": []
+}
+```
+
+- `GET /food-entries`: list all food entries
+- `POST /food-entries`: log an entry: `{ "name": string, "calories": number, "protein": number, "carbs": number }` (the server stamps today's date)
+- `DELETE /food-entries/{id}`: delete an entry
+
+Data is persisted to `data/food_entries.json` as a flat list, each entry carrying its own `date` (`YYYY-MM-DD`):
+
+```json
+[
+  { "id": "1", "name": "Oatmeal", "calories": 300, "protein": 10, "carbs": 50, "date": "2026-09-23" }
+]
+```
+
+Planned next: sessions, cookies, and login information (also JSON-backed for now).
