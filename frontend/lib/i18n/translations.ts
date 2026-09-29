@@ -91,8 +91,9 @@ const translations = {
       heading: "Find a food",
       placeholder: "Search foods…",
       helper:
-        "Searching a small built-in list for now. A real food database is coming later. Click a result to fill in the form.",
+        "Searches Livsmedelsverket's food database (CC BY 4.0), values per 100g. Click a result to fill in the form.",
       noMatches: "No matches. Try a different search.",
+      searchError: "Couldn't reach the food database. Is the backend running?",
       calSuffix: "cal",
       proteinSuffix: "g P",
       carbsSuffix: "g C",
@@ -199,8 +200,9 @@ const translations = {
       heading: "Hitta mat",
       placeholder: "Sök efter mat…",
       helper:
-        "Söker i en liten inbyggd lista för tillfället. En riktig matdatabas kommer senare. Klicka på ett resultat för att fylla i formuläret.",
+        "Söker i Livsmedelsverkets livsmedelsdatabas (CC BY 4.0), värden per 100g. Klicka på ett resultat för att fylla i formuläret.",
       noMatches: "Inga träffar. Prova en annan sökning.",
+      searchError: "Kunde inte nå matdatabasen. Körs backend?",
       calSuffix: "kal",
       proteinSuffix: "g P",
       carbsSuffix: "g K",

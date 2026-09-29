@@ -16,6 +16,15 @@ Priority = Literal["low", "medium", "high"]
 
 DATA_FILE = Path(__file__).parent / "data" / "cards.json"
 FOOD_DATA_FILE = Path(__file__).parent / "data" / "food_entries.json"
+FOOD_DATABASE_FILE = Path(__file__).parent / "data" / "food_database.json"
+
+Lang = Literal["en", "sv"]
+
+# Reference data from Livsmedelsverket (CC BY 4.0), fetched via
+# scripts/fetch_food_database.py. Static for the life of the process, so it's
+# loaded once instead of re-read on every search.
+with FOOD_DATABASE_FILE.open(encoding="utf-8") as f:
+    _FOOD_DATABASE = json.load(f)
 
 # FastAPI runs sync route handlers in a thread pool, so two requests (e.g. two
 # quick clicks) can otherwise interleave their read-modify-write on the CSV
@@ -192,3 +201,35 @@ def delete_food_entry(entry_id: str) -> None:
         if len(remaining) == len(entries):
             raise HTTPException(status_code=404, detail="Entry not found")
         write_food_entries(remaining)
+
+
+class FoodDatabaseEntry(BaseModel):
+    number: int
+    name: str
+    calories: float
+    protein: float
+    carbs: float
+
+
+@app.get("/foods", response_model=list[FoodDatabaseEntry])
+def search_foods(
+    q: str = "", lang: Lang = "en", limit: int = 50
+) -> list[FoodDatabaseEntry]:
+    name_field = "nameEn" if lang == "en" else "nameSv"
+    query = q.strip().lower()
+    matches = [
+        item
+        for item in _FOOD_DATABASE
+        if not query or query in item[name_field].lower()
+    ]
+    matches.sort(key=lambda item: item[name_field])
+    return [
+        FoodDatabaseEntry(
+            number=item["number"],
+            name=item[name_field],
+            calories=item["calories"],
+            protein=item["protein"],
+            carbs=item["carbs"],
+        )
+        for item in matches[:limit]
+    ]

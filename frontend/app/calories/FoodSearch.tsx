@@ -1,22 +1,42 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { FOOD_DATABASE, type FoodDatabaseEntry } from "./foodDatabase";
+import { searchFoodDatabase, type FoodDatabaseEntry } from "./foodDatabase";
+
+const DEBOUNCE_MS = 250;
 
 export default function FoodSearch({
   onSelect,
 }: {
   onSelect: (food: FoodDatabaseEntry) => void;
 }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState<FoodDatabaseEntry[]>([]);
+  const [error, setError] = useState(false);
 
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return FOOD_DATABASE;
-    return FOOD_DATABASE.filter((food) => food.name.toLowerCase().includes(q));
-  }, [query]);
+  // Debounced fetch from the backend as the external-sync case useEffect
+  // exists for; the AbortController drops stale responses if query/language
+  // change again before the previous request resolves.
+  useEffect(() => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      searchFoodDatabase(query, language, controller.signal)
+        .then((data) => {
+          setResults(data);
+          setError(false);
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") return;
+          setError(true);
+        });
+    }, DEBOUNCE_MS);
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [query, language]);
 
   return (
     <div className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-surface p-4">
@@ -31,35 +51,39 @@ export default function FoodSearch({
         className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
       />
       <p className="text-xs text-muted">{t("foodSearch.helper")}</p>
-      <div className="flex max-h-[28rem] flex-col gap-2 overflow-y-auto">
-        {results.length === 0 ? (
-          <p className="text-sm text-muted">{t("foodSearch.noMatches")}</p>
-        ) : (
-          results.map((food) => (
-            <button
-              key={food.name}
-              type="button"
-              onClick={() => onSelect(food)}
-              className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2 text-left text-sm shadow-sm transition-colors hover:border-accent"
-            >
-              <span className="text-foreground">{food.name}</span>
-              <span className="flex shrink-0 items-center gap-2 text-xs text-muted">
-                <span>
-                  {food.calories} {t("foodSearch.calSuffix")}
+      {error ? (
+        <p className="text-sm text-red-600">{t("foodSearch.searchError")}</p>
+      ) : (
+        <div className="flex max-h-[28rem] flex-col gap-2 overflow-y-auto">
+          {results.length === 0 ? (
+            <p className="text-sm text-muted">{t("foodSearch.noMatches")}</p>
+          ) : (
+            results.map((food) => (
+              <button
+                key={food.number}
+                type="button"
+                onClick={() => onSelect(food)}
+                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2 text-left text-sm shadow-sm transition-colors hover:border-accent"
+              >
+                <span className="text-foreground">{food.name}</span>
+                <span className="flex shrink-0 items-center gap-2 text-xs text-muted">
+                  <span>
+                    {food.calories} {t("foodSearch.calSuffix")}
+                  </span>
+                  <span>
+                    {food.protein}
+                    {t("foodSearch.proteinSuffix")}
+                  </span>
+                  <span>
+                    {food.carbs}
+                    {t("foodSearch.carbsSuffix")}
+                  </span>
                 </span>
-                <span>
-                  {food.protein}
-                  {t("foodSearch.proteinSuffix")}
-                </span>
-                <span>
-                  {food.carbs}
-                  {t("foodSearch.carbsSuffix")}
-                </span>
-              </span>
-            </button>
-          ))
-        )}
-      </div>
+              </button>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
