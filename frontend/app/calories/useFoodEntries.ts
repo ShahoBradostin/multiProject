@@ -2,10 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { apiFetch, API_BASE } from "@/lib/api";
 import type { FoodEntry } from "./types";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_KANBAN_API_URL ?? "http://localhost:8000";
 
 export function useFoodEntries() {
   const { t } = useLanguage();
@@ -15,7 +13,7 @@ export function useFoodEntries() {
 
   const loadEntries = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/food-entries`);
+      const res = await apiFetch("/food-entries");
       if (!res.ok) throw new Error("Request failed");
       const data: FoodEntry[] = await res.json();
       setEntries(data);
@@ -39,7 +37,7 @@ export function useFoodEntries() {
     entry: Pick<FoodEntry, "name" | "calories" | "protein" | "carbs">,
   ) {
     try {
-      const res = await fetch(`${API_BASE}/food-entries`, {
+      const res = await apiFetch("/food-entries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(entry),
@@ -56,7 +54,7 @@ export function useFoodEntries() {
     const previous = entries;
     setEntries((current) => current.filter((entry) => entry.id !== id));
     try {
-      const res = await fetch(`${API_BASE}/food-entries/${id}`, {
+      const res = await apiFetch(`/food-entries/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Request failed");

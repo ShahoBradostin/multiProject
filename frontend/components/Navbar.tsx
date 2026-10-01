@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type MouseEvent } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await logout();
+    router.push("/");
+  }
 
   useEffect(() => {
     function onScroll() {
@@ -63,6 +72,31 @@ export default function Navbar() {
           >
             {language === "en" ? "SV" : "EN"}
           </button>
+          {!loading &&
+            (user ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-full px-3 py-1.5 transition-colors hover:bg-accent/10 hover:text-accent"
+              >
+                {t("nav.logout")}
+              </button>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-full px-3 py-1.5 transition-colors hover:bg-accent/10 hover:text-accent"
+                >
+                  {t("nav.login")}
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-full px-3 py-1.5 transition-colors hover:bg-accent/10 hover:text-accent"
+                >
+                  {t("nav.register")}
+                </Link>
+              </>
+            ))}
           <Link
             href="/"
             className="rounded-full bg-accent px-4 py-1.5 text-accent-foreground transition-colors hover:bg-accent-hover"
