@@ -5,9 +5,11 @@ import uuid
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+import auth
 
 ColumnId = Literal["todo", "in-progress", "done"]
 COLUMN_ORDER: list[ColumnId] = ["todo", "in-progress", "done"]
@@ -16,6 +18,15 @@ Priority = Literal["low", "medium", "high"]
 
 DATA_FILE = Path(__file__).parent / "data" / "cards.json"
 FOOD_DATA_FILE = Path(__file__).parent / "data" / "food_entries.json"
+FOOD_DATABASE_FILE = Path(__file__).parent / "data" / "food_database.json"
+
+Lang = Literal["en", "sv"]
+
+# Reference data from Livsmedelsverket (CC BY 4.0), fetched via
+# scripts/fetch_food_database.py. Static for the life of the process, so it's
+# loaded once instead of re-read on every search.
+with FOOD_DATABASE_FILE.open(encoding="utf-8") as f:
+    _FOOD_DATABASE = json.load(f)
 
 # FastAPI runs sync route handlers in a thread pool, so two requests (e.g. two
 # quick clicks) can otherwise interleave their read-modify-write on the CSV
@@ -29,7 +40,10 @@ app.add_middleware(
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
+
+app.include_router(auth.router)
 
 
 class Card(BaseModel):
@@ -37,6 +51,7 @@ class Card(BaseModel):
     title: str
     columnId: ColumnId
     priority: Priority = "medium"
+    userId: str
 
 
 class NewCard(BaseModel):
@@ -52,6 +67,9 @@ class UpdateCard(BaseModel):
 
 
 def read_cards() -> list[Card]:
+    """All cards, across every user. Callers must filter by userId before
+    returning anything to a client - this exists so write paths can rewrite
+    the full file without clobbering other users' cards."""
     if not DATA_FILE.exists():
         return []
     with DATA_FILE.open(encoding="utf-8") as f:
@@ -62,6 +80,9 @@ def read_cards() -> list[Card]:
             title=item["title"],
             columnId=column_id,
             priority=item.get("priority", "medium"),
+            # Cards saved before accounts existed have no owner and are
+            # simply inaccessible now, rather than shared with everyone.
+            userId=item.get("userId", ""),
         )
         for column_id in COLUMN_ORDER
         for item in data.get(column_id, [])
@@ -77,7 +98,12 @@ def write_cards(cards: list[Card]) -> None:
     }
     for card in cards:
         grouped[card.columnId].append(
-            {"id": card.id, "title": card.title, "priority": card.priority}
+            {
+                "id": card.id,
+                "title": card.title,
+                "priority": card.priority,
+                "userId": card.userId,
+            }
         )
     with DATA_FILE.open("w", encoding="utf-8") as f:
         json.dump(grouped, f, indent=2)
@@ -85,12 +111,12 @@ def write_cards(cards: list[Card]) -> None:
 
 
 @app.get("/cards", response_model=list[Card])
-def list_cards() -> list[Card]:
-    return read_cards()
+def list_cards(user: auth.User = Depends(auth.require_user)) -> list[Card]:
+    return [card for card in read_cards() if card.userId == user.id]
 
 
 @app.post("/cards", response_model=Card)
-def add_card(new_card: NewCard) -> Card:
+def add_card(new_card: NewCard, user: auth.User = Depends(auth.require_user)) -> Card:
     with _file_lock:
         cards = read_cards()
         card = Card(
@@ -98,6 +124,7 @@ def add_card(new_card: NewCard) -> Card:
             title=new_card.title,
             columnId=new_card.columnId,
             priority=new_card.priority,
+            userId=user.id,
         )
         cards.append(card)
         write_cards(cards)
@@ -105,11 +132,13 @@ def add_card(new_card: NewCard) -> Card:
 
 
 @app.patch("/cards/{card_id}", response_model=Card)
-def update_card(card_id: str, update: UpdateCard) -> Card:
+def update_card(
+    card_id: str, update: UpdateCard, user: auth.User = Depends(auth.require_user)
+) -> Card:
     with _file_lock:
         cards = read_cards()
         for card in cards:
-            if card.id == card_id:
+            if card.id == card_id and card.userId == user.id:
                 if update.title is not None:
                     card.title = update.title
                 if update.columnId is not None:
@@ -122,10 +151,12 @@ def update_card(card_id: str, update: UpdateCard) -> Card:
 
 
 @app.delete("/cards/{card_id}", status_code=204)
-def delete_card(card_id: str) -> None:
+def delete_card(card_id: str, user: auth.User = Depends(auth.require_user)) -> None:
     with _file_lock:
         cards = read_cards()
-        remaining = [card for card in cards if card.id != card_id]
+        remaining = [
+            card for card in cards if not (card.id == card_id and card.userId == user.id)
+        ]
         if len(remaining) == len(cards):
             raise HTTPException(status_code=404, detail="Card not found")
         write_cards(remaining)
@@ -138,6 +169,7 @@ class FoodEntry(BaseModel):
     protein: float
     carbs: float
     date: str
+    userId: str
 
 
 class NewFoodEntry(BaseModel):
@@ -148,11 +180,15 @@ class NewFoodEntry(BaseModel):
 
 
 def read_food_entries() -> list[FoodEntry]:
+    """All entries, across every user - see read_cards() for why callers
+    must filter by userId themselves."""
     if not FOOD_DATA_FILE.exists():
         return []
     with FOOD_DATA_FILE.open(encoding="utf-8") as f:
         data = json.load(f)
-    return [FoodEntry(**item) for item in data]
+    return [
+        FoodEntry(**{**item, "userId": item.get("userId", "")}) for item in data
+    ]
 
 
 def write_food_entries(entries: list[FoodEntry]) -> None:
@@ -163,12 +199,14 @@ def write_food_entries(entries: list[FoodEntry]) -> None:
 
 
 @app.get("/food-entries", response_model=list[FoodEntry])
-def list_food_entries() -> list[FoodEntry]:
-    return read_food_entries()
+def list_food_entries(user: auth.User = Depends(auth.require_user)) -> list[FoodEntry]:
+    return [entry for entry in read_food_entries() if entry.userId == user.id]
 
 
 @app.post("/food-entries", response_model=FoodEntry)
-def add_food_entry(new_entry: NewFoodEntry) -> FoodEntry:
+def add_food_entry(
+    new_entry: NewFoodEntry, user: auth.User = Depends(auth.require_user)
+) -> FoodEntry:
     with _file_lock:
         entries = read_food_entries()
         entry = FoodEntry(
@@ -178,6 +216,7 @@ def add_food_entry(new_entry: NewFoodEntry) -> FoodEntry:
             protein=new_entry.protein,
             carbs=new_entry.carbs,
             date=datetime.date.today().isoformat(),
+            userId=user.id,
         )
         entries.append(entry)
         write_food_entries(entries)
@@ -185,10 +224,51 @@ def add_food_entry(new_entry: NewFoodEntry) -> FoodEntry:
 
 
 @app.delete("/food-entries/{entry_id}", status_code=204)
-def delete_food_entry(entry_id: str) -> None:
+def delete_food_entry(
+    entry_id: str, user: auth.User = Depends(auth.require_user)
+) -> None:
     with _file_lock:
         entries = read_food_entries()
-        remaining = [entry for entry in entries if entry.id != entry_id]
+        remaining = [
+            entry
+            for entry in entries
+            if not (entry.id == entry_id and entry.userId == user.id)
+        ]
         if len(remaining) == len(entries):
             raise HTTPException(status_code=404, detail="Entry not found")
         write_food_entries(remaining)
+
+
+class FoodDatabaseEntry(BaseModel):
+    number: int
+    name: str
+    calories: float
+    protein: float
+    carbs: float
+
+
+@app.get("/foods", response_model=list[FoodDatabaseEntry])
+def search_foods(
+    q: str = "",
+    lang: Lang = "en",
+    limit: int = 50,
+    user: auth.User = Depends(auth.require_user),
+) -> list[FoodDatabaseEntry]:
+    name_field = "nameEn" if lang == "en" else "nameSv"
+    query = q.strip().lower()
+    matches = [
+        item
+        for item in _FOOD_DATABASE
+        if not query or query in item[name_field].lower()
+    ]
+    matches.sort(key=lambda item: item[name_field])
+    return [
+        FoodDatabaseEntry(
+            number=item["number"],
+            name=item[name_field],
+            calories=item["calories"],
+            protein=item["protein"],
+            carbs=item["carbs"],
+        )
+        for item in matches[:limit]
+    ]

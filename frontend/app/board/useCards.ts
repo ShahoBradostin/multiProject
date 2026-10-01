@@ -2,10 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { apiFetch, API_BASE } from "@/lib/api";
 import type { Card, ColumnId, Priority } from "./types";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_KANBAN_API_URL ?? "http://localhost:8000";
 
 export function useCards() {
   const { t } = useLanguage();
@@ -15,7 +13,7 @@ export function useCards() {
 
   const loadCards = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/cards`);
+      const res = await apiFetch("/cards");
       if (!res.ok) throw new Error("Request failed");
       const data: Card[] = await res.json();
       setCards(data);
@@ -41,7 +39,7 @@ export function useCards() {
     priority: Priority,
   ) {
     try {
-      const res = await fetch(`${API_BASE}/cards`, {
+      const res = await apiFetch("/cards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, columnId, priority }),
@@ -63,7 +61,7 @@ export function useCards() {
       current.map((card) => (card.id === id ? { ...card, ...updates } : card)),
     );
     try {
-      const res = await fetch(`${API_BASE}/cards/${id}`, {
+      const res = await apiFetch(`/cards/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
@@ -83,7 +81,7 @@ export function useCards() {
     const previous = cards;
     setCards((current) => current.filter((card) => card.id !== id));
     try {
-      const res = await fetch(`${API_BASE}/cards/${id}`, {
+      const res = await apiFetch(`/cards/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Request failed");

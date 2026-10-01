@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import FadeIn from "@/components/FadeIn";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 // TODO: replace with the real address before shipping.
 const CONTACT_EMAIL = "######";
@@ -34,6 +35,7 @@ const FEATURE_BLURBS = [
 
 export default function Home() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -50,9 +52,8 @@ export default function Home() {
       <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-16 px-6 pt-24 text-center sm:px-16">
         <FadeIn className="flex flex-col items-center gap-4">
           <h1 className="font-serif text-5xl font-medium tracking-tight text-foreground sm:text-6xl">
-            Shapo
+            {t("home.welcomeHeading", { username: user?.username ?? "" })}
           </h1>
-          <p className="max-w-md text-lg text-muted">{t("home.tagline")}</p>
         </FadeIn>
       </div>
 

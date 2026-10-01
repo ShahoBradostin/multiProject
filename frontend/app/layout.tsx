@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+import { AuthProvider } from "@/lib/auth/AuthContext";
 
 const bodyFont = Inter({
   variable: "--font-body",
@@ -28,9 +29,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <LanguageProvider>
-          <Navbar />
-          <div className="flex flex-1 flex-col">{children}</div>
-          <Footer />
+          <AuthProvider>
+            <Navbar />
+            <div className="flex flex-1 flex-col">{children}</div>
+            <Footer />
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

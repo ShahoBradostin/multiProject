@@ -4,8 +4,8 @@ A personal site made of multiple standalone projects, each living at its own pag
 
 ## Structure
 
-- `frontend/`: the Next.js site: a project hub page plus one page per project (e.g. the Kanban board).
-- `backend/`: Python (FastAPI) backend. Currently serves the Kanban board's data from a JSON file.
+- `frontend/`: the Next.js site: a project hub page plus one page per project (e.g. the Kanban board, the calorie tracker).
+- `backend/`: Python (FastAPI) backend. Serves the Kanban board's data, the calorie tracker's logged entries, and a reference food database (name/calorie/protein/carb search) sourced from Livsmedelsverket's open API.
 
 ## Running locally
 
