@@ -28,6 +28,16 @@ General pattern right now:
 - Backend: Python, follow the existing code style in the project.
 - Don't add new lint/formatting tools, use what's already configured in each project.
 
+## Post-task review
+
+- After finishing a coding task, spawn another agent acting as a coding and architecture specialist to review the work, and have it do this 3 times (3 separate review passes).
+- Each pass gives the code a rating from 1-8:
+  - 1-3: low quality
+  - 4-5: medium quality
+  - 6: upper medium quality
+  - 7-8: high quality (this is the goal whenever possible)
+- If a pass rates the code below 7, address the feedback and re-review before considering the task done.
+
 ## Things to avoid / always do
 
 - Never use em dashes ("—") in code, docs, UI copy, or commit messages. Use ",", ".", or ":" instead.
