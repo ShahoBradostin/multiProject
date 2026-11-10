@@ -90,7 +90,7 @@ export default function AboutPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-16 px-6 py-10 sm:px-16">
       <Link
         href="/"
-        className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:border-accent hover:text-accent"
+        className="inline-flex w-fit items-center gap-1.5 rounded-none border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:border-accent hover:text-accent"
       >
         {t("common.backHome")}
       </Link>
@@ -224,7 +224,7 @@ export default function AboutPage() {
         <p className="text-muted">Want to work together or just say hi?</p>
         <Link
           href="/#contact"
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-hover"
+          className="rounded-none bg-accent-button px-4 py-2 text-sm font-medium text-accent-button-foreground transition-colors hover:bg-accent-button-hover"
         >
           {t("nav.contact")}
         </Link>

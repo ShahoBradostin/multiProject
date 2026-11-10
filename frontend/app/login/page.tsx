@@ -77,7 +77,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-hover disabled:opacity-60"
+          className="rounded-none bg-accent-button px-4 py-2 text-sm font-medium text-accent-button-foreground transition-colors hover:bg-accent-button-hover disabled:opacity-60"
         >
           {t("auth.submitLogin")}
         </button>

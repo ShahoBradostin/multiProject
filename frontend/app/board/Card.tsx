@@ -83,7 +83,7 @@ export default function Card({
           value={card.priority}
           onChange={(priority: Priority) => onUpdate(card.id, { priority })}
           ariaLabel={t("board.priorityAria")}
-          triggerClassName={`cursor-pointer whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${PRIORITY_STYLES[card.priority]}`}
+          triggerClassName={`cursor-pointer whitespace-nowrap rounded-none px-2 py-0.5 text-xs font-medium transition-colors ${PRIORITY_STYLES[card.priority]}`}
           options={PRIORITIES.map((p) => ({
             value: p,
             label: t(`board.priorities.${p}`),
@@ -94,7 +94,7 @@ export default function Card({
       <button
         type="button"
         onClick={() => onDelete(card.id)}
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted opacity-0 transition-all hover:bg-red-500/10 hover:text-red-500 group-hover:opacity-100"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-none text-muted opacity-0 transition-all hover:bg-red-500/10 hover:text-red-500 group-hover:opacity-100"
         aria-label={t("board.deleteCard", { title: card.title })}
       >
         <svg

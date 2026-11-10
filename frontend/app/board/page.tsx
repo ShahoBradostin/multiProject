@@ -17,7 +17,7 @@ export default function BoardPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-6 py-10 sm:px-10 lg:px-16">
       <Link
         href="/"
-        className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:border-accent hover:text-accent"
+        className="inline-flex w-fit items-center gap-1.5 rounded-none border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:border-accent hover:text-accent"
       >
         {t("common.backHome")}
       </Link>

@@ -1,17 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f2e8;
-  --foreground: #1c1a17;
-  --muted: #6b625a;
-  --surface: #f0e9de;
-  --border: #e8dfd0;
-  --accent: #b45f3c;
-  --accent-hover: #9c5030;
-  --accent-foreground: #fdf9f2;
-  --status-todo: #b1544a;
-  --status-progress: #bd8a45;
-  --status-done: #6f8f6a;
+  --background: #0e1217;
+  --foreground: #e8edf2;
+  --muted: #8b96a3;
+  --surface: #161b22;
+  --border: #272e37;
+  --accent: #4f8fe0;
+  --accent-hover: #6ba2e8;
+  --accent-foreground: #0e1217;
+  --accent-button: #22395a;
+  --accent-button-hover: #2c4873;
+  --accent-button-foreground: #eef3f9;
+  --status-todo: #d1697a;
+  --status-progress: #c9a257;
+  --status-done: #5fab8a;
 }
 
 @theme inline {
@@ -23,6 +26,9 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-button: var(--accent-button);
+  --color-accent-button-hover: var(--accent-button-hover);
+  --color-accent-button-foreground: var(--accent-button-foreground);
   --color-status-todo: var(--status-todo);
   --color-status-progress: var(--status-progress);
   --color-status-done: var(--status-done);

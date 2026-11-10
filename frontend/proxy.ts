@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { API_BASE } from "@/lib/api";
+
 const PUBLIC_PATHS = ["/login", "/register"];
-const API_BASE =
-  process.env.NEXT_PUBLIC_KANBAN_API_URL ?? "http://localhost:8000";
 
 // The whole site requires a logged-in session now, not just /board and
 // /calories - visiting anything (including "/") without one bounces to

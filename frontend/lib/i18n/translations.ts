@@ -25,6 +25,9 @@ const translations = {
     },
     home: {
       welcomeHeading: "Welcome {username} to Shapo's platform.",
+      heroSubheading:
+        "Product design and full-stack development, applied to real, working software, not demos or drafts. Each project here is designed, built, and shipped end to end, from the interface down to the database.",
+      heroCta: "Explore the projects",
       featured: "Featured",
       kanbanTitle: "Kanban Board",
       kanbanDescription: "Drag cards between To Do, In Progress, and Done.",
@@ -41,7 +44,7 @@ const translations = {
     board: {
       title: "Kanban Board",
       description:
-        "A kanban board is a simple way to track work as it moves through stages: each task gets a card, and each column marks where it stands. Add a card under To Do, drag it into In Progress once you're on it, and into Done when it's wrapped. Delete what you don't need, and everything sticks around, quietly saved to a JSON file on the backend.",
+        "A kanban board is a simple way to track work as it moves through stages: each task gets a card, and each column marks where it stands. Add a card under To Do, drag it into In Progress once you're on it, and into Done when it's wrapped. Delete what you don't need, and everything sticks around, quietly saved to a database on the backend.",
       loading: "Loading board…",
       newCardHeading: "New card",
       cardTitlePlaceholder: "Card title",
@@ -161,6 +164,9 @@ const translations = {
     },
     home: {
       welcomeHeading: "Välkommen {username} till Shapos plattform.",
+      heroSubheading:
+        "Produktdesign och fullstacksutveckling, tillämpat på riktig, fungerande mjukvara, inte demos eller utkast. Varje projekt här är designat, byggt och levererat från start till mål, från gränssnittet ner till databasen.",
+      heroCta: "Utforska projekten",
       featured: "Utvald",
       kanbanTitle: "Kanban-tavla",
       kanbanDescription: "Dra kort mellan Att göra, Pågår och Klart.",
@@ -177,7 +183,7 @@ const translations = {
     board: {
       title: "Kanban-tavla",
       description:
-        "En kanban-tavla är ett enkelt sätt att följa arbete genom olika steg: varje uppgift får ett kort, och varje kolumn visar var det står. Lägg till ett kort under Att göra, dra det till Pågår när du börjar med det, och till Klart när det är avslutat. Ta bort det du inte behöver, och allt sparas tyst till en JSON-fil på backend.",
+        "En kanban-tavla är ett enkelt sätt att följa arbete genom olika steg: varje uppgift får ett kort, och varje kolumn visar var det står. Lägg till ett kort under Att göra, dra det till Pågår när du börjar med det, och till Klart när det är avslutat. Ta bort det du inte behöver, och allt sparas tyst till en databas på backend.",
       loading: "Laddar tavlan…",
       newCardHeading: "Nytt kort",
       cardTitlePlaceholder: "Korttitel",

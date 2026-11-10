@@ -49,88 +49,108 @@ export default function Home() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-16 px-6 pt-24 text-center sm:px-16">
-        <FadeIn className="flex flex-col items-center gap-4">
-          <h1 className="font-serif text-5xl font-medium tracking-tight text-foreground sm:text-6xl">
+      <section className="relative -mt-20 flex min-h-screen w-full items-end overflow-hidden bg-foreground">
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          src="/video/hero-background.mp4"
+          poster="/video/hero-poster.jpg"
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+
+        <FadeIn className="relative z-10 flex w-full flex-col gap-8 px-6 pb-16 sm:px-10 lg:px-16">
+          <h1 className="max-w-4xl font-serif text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
             {t("home.welcomeHeading", { username: user?.username ?? "" })}
           </h1>
-        </FadeIn>
-      </div>
-
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-24 sm:px-10 lg:px-16">
-        <FadeIn delayMs={100}>
-          <Link
-            href="/board"
-            className="group flex flex-col rounded-2xl border border-border bg-surface px-6 py-5 text-left shadow-sm transition-all hover:border-accent hover:shadow-md sm:px-8"
-          >
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="font-serif text-2xl text-foreground transition-colors group-hover:text-accent">
-                {t("home.kanbanTitle")}
-              </h2>
-              <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-accent opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                {t("home.featured")}
+          <div className="h-px w-full bg-white/20" />
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <p className="max-w-lg text-base text-white/70 sm:text-lg">
+              {t("home.heroSubheading")}
+            </p>
+            <a
+              href="#projects"
+              className="group inline-flex w-fit shrink-0 items-center gap-2 rounded-none bg-accent-button px-6 py-3 text-sm font-medium text-accent-button-foreground transition-colors hover:bg-accent-button-hover"
+            >
+              {t("home.heroCta")}
+              <span
+                aria-hidden
+                className="transition-transform group-hover:translate-y-0.5"
+              >
+                ↓
               </span>
-            </div>
-            <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:grid-rows-[1fr] group-focus-visible:grid-rows-[1fr]">
-              <div className="overflow-hidden">
-                <p className="pt-2 text-sm text-muted">
-                  {t("home.kanbanDescription")}
-                </p>
-                <span className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-accent">
+            </a>
+          </div>
+        </FadeIn>
+      </section>
+
+      <div
+        id="projects"
+        className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-24 sm:px-10 lg:px-16"
+      >
+        <div className="grid grid-cols-2 gap-5 sm:gap-6 lg:grid-cols-3">
+          <FadeIn delayMs={100}>
+            <Link
+              href="/board"
+              className="group relative block aspect-square overflow-hidden bg-surface"
+            >
+              <img
+                src="/projects/kanban.jpg"
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+              <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-5">
+                <h2 className="font-serif text-lg text-white sm:text-xl">
+                  {t("home.kanbanTitle")}
+                </h2>
+                <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-white/80 sm:text-sm">
                   {t("home.openBoard")} <span aria-hidden>→</span>
                 </span>
               </div>
-            </div>
-          </Link>
-        </FadeIn>
+            </Link>
+          </FadeIn>
 
-        <FadeIn delayMs={150}>
-          <Link
-            href="/calories"
-            className="group flex flex-col rounded-2xl border border-border bg-surface px-6 py-5 text-left shadow-sm transition-all hover:border-accent hover:shadow-md sm:px-8"
-          >
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="font-serif text-2xl text-foreground transition-colors group-hover:text-accent">
-                {t("home.caloriesTitle")}
-              </h2>
-              <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-accent opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                {t("home.newTag")}
-              </span>
-            </div>
-            <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:grid-rows-[1fr] group-focus-visible:grid-rows-[1fr]">
-              <div className="overflow-hidden">
-                <p className="pt-2 text-sm text-muted">
-                  {t("home.caloriesDescription")}
-                </p>
-                <span className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-accent">
+          <FadeIn delayMs={150}>
+            <Link
+              href="/calories"
+              className="group relative block aspect-square overflow-hidden bg-surface"
+            >
+              <img
+                src="/projects/calories.jpg"
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+              <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-5">
+                <h2 className="font-serif text-lg text-white sm:text-xl">
+                  {t("home.caloriesTitle")}
+                </h2>
+                <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-white/80 sm:text-sm">
                   {t("home.openTracker")} <span aria-hidden>→</span>
                 </span>
               </div>
-            </div>
-          </Link>
-        </FadeIn>
+            </Link>
+          </FadeIn>
 
-        {UPCOMING_PROJECT_NUMBERS.map((n, index) => (
-          <FadeIn key={n} delayMs={200 + index * 50}>
-            <div className="group flex cursor-default flex-col rounded-2xl border border-border bg-surface px-6 py-5 text-left shadow-sm transition-all sm:px-8">
-              <div className="flex items-center justify-between gap-4">
-                <h2 className="font-serif text-2xl text-foreground">
-                  {t("home.projectPlaceholder", { n })}
-                </h2>
-                <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-muted opacity-0 transition-opacity group-hover:opacity-100">
-                  {t("home.comingSoon")}
-                </span>
-              </div>
-              <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:grid-rows-[1fr]">
-                <div className="overflow-hidden">
-                  <p className="pt-2 text-sm text-muted">
-                    {t("home.placeholderDescription")}
-                  </p>
+          {UPCOMING_PROJECT_NUMBERS.map((n, index) => (
+            <FadeIn key={n} delayMs={200 + index * 50}>
+              <div className="group relative flex aspect-square cursor-default flex-col justify-end overflow-hidden border border-border bg-surface p-4 sm:p-5">
+                <ImagePlaceholder
+                  className="absolute inset-0 border-none uppercase tracking-wide"
+                  label={t("home.comingSoon")}
+                />
+                <div className="relative">
+                  <h2 className="font-serif text-lg text-foreground sm:text-xl">
+                    {t("home.projectPlaceholder", { n })}
+                  </h2>
                 </div>
               </div>
-            </div>
-          </FadeIn>
-        ))}
+            </FadeIn>
+          ))}
+        </div>
       </div>
 
       <section className="w-full bg-surface">
@@ -238,7 +258,7 @@ export default function Home() {
             </div>
             <button
               type="submit"
-              className="mt-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-hover"
+              className="mt-2 rounded-none bg-accent-button px-4 py-2 text-sm font-medium text-accent-button-foreground transition-colors hover:bg-accent-button-hover"
             >
               {t("contact.submit")}
             </button>

@@ -1,22 +1,15 @@
 import datetime
-import json
-import threading
 import uuid
-from pathlib import Path
 
 import bcrypt
+import pymysql
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, field_validator
 
-USERS_FILE = Path(__file__).parent / "data" / "users.json"
-SESSIONS_FILE = Path(__file__).parent / "data" / "sessions.json"
+import db
 
 SESSION_COOKIE = "session_token"
 SESSION_TTL = datetime.timedelta(days=7)
-
-# Guards read-modify-write on the JSON files below, same reasoning as
-# main.py's _file_lock: FastAPI's sync routes run in a thread pool.
-_lock = threading.Lock()
 
 
 class User(BaseModel):
@@ -55,32 +48,34 @@ class LoginRequest(BaseModel):
     password: str
 
 
-def read_users() -> list[User]:
-    if not USERS_FILE.exists():
-        return []
-    with USERS_FILE.open(encoding="utf-8") as f:
-        return [User(**item) for item in json.load(f)]
+def _user_from_row(row: dict) -> User:
+    return User(
+        id=row["id"],
+        username=row["username"],
+        passwordHash=row["password_hash"],
+        createdAt=row["created_at"].isoformat(),
+    )
 
 
-def write_users(users: list[User]) -> None:
-    USERS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with USERS_FILE.open("w", encoding="utf-8") as f:
-        json.dump([user.model_dump() for user in users], f, indent=2)
-        f.write("\n")
+def get_user_by_username(username: str) -> User | None:
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        row = cursor.fetchone()
+    return _user_from_row(row) if row else None
 
 
-def read_sessions() -> dict[str, dict]:
-    if not SESSIONS_FILE.exists():
-        return {}
-    with SESSIONS_FILE.open(encoding="utf-8") as f:
-        return json.load(f)
-
-
-def write_sessions(sessions: dict[str, dict]) -> None:
-    SESSIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with SESSIONS_FILE.open("w", encoding="utf-8") as f:
-        json.dump(sessions, f, indent=2)
-        f.write("\n")
+def insert_user(user: User) -> None:
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            "INSERT INTO users (id, username, password_hash, created_at) "
+            "VALUES (%s, %s, %s, %s)",
+            (
+                user.id,
+                user.username,
+                user.passwordHash,
+                datetime.datetime.fromisoformat(user.createdAt),
+            ),
+        )
 
 
 def hash_password(password: str) -> str:
@@ -94,40 +89,35 @@ def verify_password(password: str, password_hash: str) -> bool:
 def create_session(user_id: str) -> tuple[str, datetime.datetime]:
     token = uuid.uuid4().hex
     expires_at = datetime.datetime.now(datetime.timezone.utc) + SESSION_TTL
-    with _lock:
-        sessions = read_sessions()
-        sessions[token] = {
-            "userId": user_id,
-            "expiresAt": expires_at.isoformat(),
-        }
-        write_sessions(sessions)
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            "INSERT INTO sessions (token, user_id, expires_at) VALUES (%s, %s, %s)",
+            (token, user_id, expires_at),
+        )
     return token, expires_at
 
 
 def get_user_for_token(token: str) -> User | None:
-    with _lock:
-        sessions = read_sessions()
-        session = sessions.get(token)
-        if session is None:
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            "SELECT sessions.expires_at, users.* FROM sessions "
+            "JOIN users ON users.id = sessions.user_id "
+            "WHERE sessions.token = %s",
+            (token,),
+        )
+        row = cursor.fetchone()
+        if row is None:
             return None
-        expires_at = datetime.datetime.fromisoformat(session["expiresAt"])
+        expires_at = row["expires_at"].replace(tzinfo=datetime.timezone.utc)
         if expires_at < datetime.datetime.now(datetime.timezone.utc):
-            del sessions[token]
-            write_sessions(sessions)
+            cursor.execute("DELETE FROM sessions WHERE token = %s", (token,))
             return None
-        user_id = session["userId"]
-    for user in read_users():
-        if user.id == user_id:
-            return user
-    return None
+    return _user_from_row(row)
 
 
 def delete_session(token: str) -> None:
-    with _lock:
-        sessions = read_sessions()
-        if token in sessions:
-            del sessions[token]
-            write_sessions(sessions)
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("DELETE FROM sessions WHERE token = %s", (token,))
 
 
 def require_user(request: Request) -> User:
@@ -154,18 +144,16 @@ router = APIRouter(prefix="/auth")
 
 @router.post("/register", response_model=UserPublic)
 def register(payload: RegisterRequest, response: Response) -> UserPublic:
-    with _lock:
-        users = read_users()
-        if any(u.username == payload.username for u in users):
-            raise HTTPException(status_code=400, detail="Username already taken")
-        user = User(
-            id=uuid.uuid4().hex,
-            username=payload.username,
-            passwordHash=hash_password(payload.password),
-            createdAt=datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        )
-        users.append(user)
-        write_users(users)
+    user = User(
+        id=uuid.uuid4().hex,
+        username=payload.username,
+        passwordHash=hash_password(payload.password),
+        createdAt=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    )
+    try:
+        insert_user(user)
+    except pymysql.err.IntegrityError:
+        raise HTTPException(status_code=400, detail="Username already taken")
 
     token, expires_at = create_session(user.id)
     _set_session_cookie(response, token, expires_at)
@@ -174,8 +162,7 @@ def register(payload: RegisterRequest, response: Response) -> UserPublic:
 
 @router.post("/login", response_model=UserPublic)
 def login(payload: LoginRequest, response: Response) -> UserPublic:
-    users = read_users()
-    user = next((u for u in users if u.username == payload.username), None)
+    user = get_user_by_username(payload.username)
     if user is None or not verify_password(payload.password, user.passwordHash):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 

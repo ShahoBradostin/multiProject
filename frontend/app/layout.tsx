@@ -31,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <LanguageProvider>
           <AuthProvider>
             <Navbar />
-            <div className="flex flex-1 flex-col">{children}</div>
+            <div className="flex flex-1 flex-col pt-20">{children}</div>
             <Footer />
           </AuthProvider>
         </LanguageProvider>

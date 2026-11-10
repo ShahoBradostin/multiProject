@@ -1,8 +1,5 @@
 import datetime
-import json
-import threading
 import uuid
-from pathlib import Path
 from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -10,28 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 import auth
+import db
 
 ColumnId = Literal["todo", "in-progress", "done"]
-COLUMN_ORDER: list[ColumnId] = ["todo", "in-progress", "done"]
-
 Priority = Literal["low", "medium", "high"]
-
-DATA_FILE = Path(__file__).parent / "data" / "cards.json"
-FOOD_DATA_FILE = Path(__file__).parent / "data" / "food_entries.json"
-FOOD_DATABASE_FILE = Path(__file__).parent / "data" / "food_database.json"
-
 Lang = Literal["en", "sv"]
-
-# Reference data from Livsmedelsverket (CC BY 4.0), fetched via
-# scripts/fetch_food_database.py. Static for the life of the process, so it's
-# loaded once instead of re-read on every search.
-with FOOD_DATABASE_FILE.open(encoding="utf-8") as f:
-    _FOOD_DATABASE = json.load(f)
-
-# FastAPI runs sync route handlers in a thread pool, so two requests (e.g. two
-# quick clicks) can otherwise interleave their read-modify-write on the CSV
-# and clobber each other. This makes each mutation atomic within this process.
-_file_lock = threading.Lock()
 
 app = FastAPI(title="Kanban API")
 
@@ -66,100 +46,74 @@ class UpdateCard(BaseModel):
     priority: Priority | None = None
 
 
-def read_cards() -> list[Card]:
-    """All cards, across every user. Callers must filter by userId before
-    returning anything to a client - this exists so write paths can rewrite
-    the full file without clobbering other users' cards."""
-    if not DATA_FILE.exists():
-        return []
-    with DATA_FILE.open(encoding="utf-8") as f:
-        data = json.load(f)
-    return [
-        Card(
-            id=item["id"],
-            title=item["title"],
-            columnId=column_id,
-            priority=item.get("priority", "medium"),
-            # Cards saved before accounts existed have no owner and are
-            # simply inaccessible now, rather than shared with everyone.
-            userId=item.get("userId", ""),
-        )
-        for column_id in COLUMN_ORDER
-        for item in data.get(column_id, [])
-    ]
-
-
-def write_cards(cards: list[Card]) -> None:
-    DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-    # Grouping by column is the file's actual structure (not just a sort),
-    # so a card's column never needs repeating inside each entry.
-    grouped: dict[str, list[dict[str, str]]] = {
-        column_id: [] for column_id in COLUMN_ORDER
-    }
-    for card in cards:
-        grouped[card.columnId].append(
-            {
-                "id": card.id,
-                "title": card.title,
-                "priority": card.priority,
-                "userId": card.userId,
-            }
-        )
-    with DATA_FILE.open("w", encoding="utf-8") as f:
-        json.dump(grouped, f, indent=2)
-        f.write("\n")
+def _card_from_row(row: dict) -> Card:
+    return Card(
+        id=row["id"],
+        title=row["title"],
+        columnId=row["column_id"],
+        priority=row["priority"],
+        userId=row["user_id"] or "",
+    )
 
 
 @app.get("/cards", response_model=list[Card])
 def list_cards(user: auth.User = Depends(auth.require_user)) -> list[Card]:
-    return [card for card in read_cards() if card.userId == user.id]
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("SELECT * FROM cards WHERE user_id = %s", (user.id,))
+        rows = cursor.fetchall()
+    return [_card_from_row(row) for row in rows]
 
 
 @app.post("/cards", response_model=Card)
 def add_card(new_card: NewCard, user: auth.User = Depends(auth.require_user)) -> Card:
-    with _file_lock:
-        cards = read_cards()
-        card = Card(
-            id=uuid.uuid4().hex,
-            title=new_card.title,
-            columnId=new_card.columnId,
-            priority=new_card.priority,
-            userId=user.id,
+    card = Card(
+        id=uuid.uuid4().hex,
+        title=new_card.title,
+        columnId=new_card.columnId,
+        priority=new_card.priority,
+        userId=user.id,
+    )
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            "INSERT INTO cards (id, title, column_id, priority, user_id) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            (card.id, card.title, card.columnId, card.priority, card.userId),
         )
-        cards.append(card)
-        write_cards(cards)
-        return card
+    return card
 
 
 @app.patch("/cards/{card_id}", response_model=Card)
 def update_card(
     card_id: str, update: UpdateCard, user: auth.User = Depends(auth.require_user)
 ) -> Card:
-    with _file_lock:
-        cards = read_cards()
-        for card in cards:
-            if card.id == card_id and card.userId == user.id:
-                if update.title is not None:
-                    card.title = update.title
-                if update.columnId is not None:
-                    card.columnId = update.columnId
-                if update.priority is not None:
-                    card.priority = update.priority
-                write_cards(cards)
-                return card
-        raise HTTPException(status_code=404, detail="Card not found")
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM cards WHERE id = %s AND user_id = %s", (card_id, user.id)
+        )
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Card not found")
+
+        title = update.title if update.title is not None else row["title"]
+        column_id = update.columnId if update.columnId is not None else row["column_id"]
+        priority = update.priority if update.priority is not None else row["priority"]
+
+        cursor.execute(
+            "UPDATE cards SET title = %s, column_id = %s, priority = %s "
+            "WHERE id = %s AND user_id = %s",
+            (title, column_id, priority, card_id, user.id),
+        )
+    return Card(id=card_id, title=title, columnId=column_id, priority=priority, userId=user.id)
 
 
 @app.delete("/cards/{card_id}", status_code=204)
 def delete_card(card_id: str, user: auth.User = Depends(auth.require_user)) -> None:
-    with _file_lock:
-        cards = read_cards()
-        remaining = [
-            card for card in cards if not (card.id == card_id and card.userId == user.id)
-        ]
-        if len(remaining) == len(cards):
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            "DELETE FROM cards WHERE id = %s AND user_id = %s", (card_id, user.id)
+        )
+        if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Card not found")
-        write_cards(remaining)
 
 
 class FoodEntry(BaseModel):
@@ -179,64 +133,67 @@ class NewFoodEntry(BaseModel):
     carbs: float
 
 
-def read_food_entries() -> list[FoodEntry]:
-    """All entries, across every user - see read_cards() for why callers
-    must filter by userId themselves."""
-    if not FOOD_DATA_FILE.exists():
-        return []
-    with FOOD_DATA_FILE.open(encoding="utf-8") as f:
-        data = json.load(f)
-    return [
-        FoodEntry(**{**item, "userId": item.get("userId", "")}) for item in data
-    ]
-
-
-def write_food_entries(entries: list[FoodEntry]) -> None:
-    FOOD_DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with FOOD_DATA_FILE.open("w", encoding="utf-8") as f:
-        json.dump([entry.model_dump() for entry in entries], f, indent=2)
-        f.write("\n")
+def _food_entry_from_row(row: dict) -> FoodEntry:
+    return FoodEntry(
+        id=row["id"],
+        name=row["name"],
+        calories=row["calories"],
+        protein=row["protein"],
+        carbs=row["carbs"],
+        date=row["date"].isoformat(),
+        userId=row["user_id"] or "",
+    )
 
 
 @app.get("/food-entries", response_model=list[FoodEntry])
 def list_food_entries(user: auth.User = Depends(auth.require_user)) -> list[FoodEntry]:
-    return [entry for entry in read_food_entries() if entry.userId == user.id]
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("SELECT * FROM food_entries WHERE user_id = %s", (user.id,))
+        rows = cursor.fetchall()
+    return [_food_entry_from_row(row) for row in rows]
 
 
 @app.post("/food-entries", response_model=FoodEntry)
 def add_food_entry(
     new_entry: NewFoodEntry, user: auth.User = Depends(auth.require_user)
 ) -> FoodEntry:
-    with _file_lock:
-        entries = read_food_entries()
-        entry = FoodEntry(
-            id=uuid.uuid4().hex,
-            name=new_entry.name,
-            calories=new_entry.calories,
-            protein=new_entry.protein,
-            carbs=new_entry.carbs,
-            date=datetime.date.today().isoformat(),
-            userId=user.id,
+    entry = FoodEntry(
+        id=uuid.uuid4().hex,
+        name=new_entry.name,
+        calories=new_entry.calories,
+        protein=new_entry.protein,
+        carbs=new_entry.carbs,
+        date=datetime.date.today().isoformat(),
+        userId=user.id,
+    )
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            "INSERT INTO food_entries (id, name, calories, protein, carbs, date, user_id) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (
+                entry.id,
+                entry.name,
+                entry.calories,
+                entry.protein,
+                entry.carbs,
+                entry.date,
+                entry.userId,
+            ),
         )
-        entries.append(entry)
-        write_food_entries(entries)
-        return entry
+    return entry
 
 
 @app.delete("/food-entries/{entry_id}", status_code=204)
 def delete_food_entry(
     entry_id: str, user: auth.User = Depends(auth.require_user)
 ) -> None:
-    with _file_lock:
-        entries = read_food_entries()
-        remaining = [
-            entry
-            for entry in entries
-            if not (entry.id == entry_id and entry.userId == user.id)
-        ]
-        if len(remaining) == len(entries):
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            "DELETE FROM food_entries WHERE id = %s AND user_id = %s",
+            (entry_id, user.id),
+        )
+        if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Entry not found")
-        write_food_entries(remaining)
 
 
 class FoodDatabaseEntry(BaseModel):
@@ -247,6 +204,9 @@ class FoodDatabaseEntry(BaseModel):
     carbs: float
 
 
+_NAME_COLUMN: dict[Lang, str] = {"en": "name_en", "sv": "name_sv"}
+
+
 @app.get("/foods", response_model=list[FoodDatabaseEntry])
 def search_foods(
     q: str = "",
@@ -254,21 +214,14 @@ def search_foods(
     limit: int = 50,
     user: auth.User = Depends(auth.require_user),
 ) -> list[FoodDatabaseEntry]:
-    name_field = "nameEn" if lang == "en" else "nameSv"
-    query = q.strip().lower()
-    matches = [
-        item
-        for item in _FOOD_DATABASE
-        if not query or query in item[name_field].lower()
-    ]
-    matches.sort(key=lambda item: item[name_field])
-    return [
-        FoodDatabaseEntry(
-            number=item["number"],
-            name=item[name_field],
-            calories=item["calories"],
-            protein=item["protein"],
-            carbs=item["carbs"],
+    name_column = _NAME_COLUMN[lang]
+    query = q.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    with db.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            f"SELECT number, {name_column} AS name, calories, protein, carbs "
+            f"FROM food_database WHERE {name_column} LIKE %s "
+            f"ORDER BY {name_column} LIMIT %s",
+            (f"%{query}%", limit),
         )
-        for item in matches[:limit]
-    ]
+        rows = cursor.fetchall()
+    return [FoodDatabaseEntry(**row) for row in rows]

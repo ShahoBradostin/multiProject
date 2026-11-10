@@ -9,8 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_KANBAN_API_URL ?? "http://localhost:8000";
+import { API_BASE } from "@/lib/api";
 
 export type AuthUser = {
   id: string;

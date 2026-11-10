@@ -92,7 +92,7 @@ export default function AddCardForm({
       />
       <button
         type="submit"
-        className="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-hover"
+        className="rounded-none bg-accent-button px-3 py-2 text-sm font-medium text-accent-button-foreground transition-colors hover:bg-accent-button-hover"
       >
         {t("board.addCard")}
       </button>
