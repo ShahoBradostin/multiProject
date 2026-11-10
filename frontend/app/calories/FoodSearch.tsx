@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { searchFoodDatabase, type FoodDatabaseEntry } from "./foodDatabase";
+import { getFoodDatabase, type FoodDatabaseEntry } from "./foodDatabase";
 
-const DEBOUNCE_MS = 250;
+const RESULTS_LIMIT = 50;
 
 export default function FoodSearch({
   onSelect,
@@ -13,30 +13,36 @@ export default function FoodSearch({
 }) {
   const { t, language } = useLanguage();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<FoodDatabaseEntry[]>([]);
+  const [foods, setFoods] = useState<FoodDatabaseEntry[]>([]);
   const [error, setError] = useState(false);
 
-  // Debounced fetch from the backend as the external-sync case useEffect
-  // exists for; the AbortController drops stale responses if query/language
-  // change again before the previous request resolves.
+  // Loads the (cached, see foodDatabase.ts) full list once per language
+  // as the external-sync case useEffect exists for; searching below just
+  // filters this in memory, no request per keystroke.
   useEffect(() => {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => {
-      searchFoodDatabase(query, language, controller.signal)
-        .then((data) => {
-          setResults(data);
+    let cancelled = false;
+    getFoodDatabase(language)
+      .then((data) => {
+        if (!cancelled) {
+          setFoods(data);
           setError(false);
-        })
-        .catch((err) => {
-          if (err instanceof DOMException && err.name === "AbortError") return;
-          setError(true);
-        });
-    }, DEBOUNCE_MS);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setError(true);
+      });
     return () => {
-      clearTimeout(timeout);
-      controller.abort();
+      cancelled = true;
     };
-  }, [query, language]);
+  }, [language]);
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const matches = q
+      ? foods.filter((food) => food.name.toLowerCase().includes(q))
+      : foods;
+    return matches.slice(0, RESULTS_LIMIT);
+  }, [foods, query]);
 
   return (
     <div className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-surface p-4">
