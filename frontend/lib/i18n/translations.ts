@@ -109,9 +109,9 @@ const translations = {
       description:
         "Have a question or just want to say hi? Fill this in, and it'll open your email client with everything ready to send.",
       nameLabel: "Your name",
-      namePlaceholder: "Jane Doe",
+      namePlaceholder: "Your name",
       emailLabel: "Your email",
-      emailPlaceholder: "jane@example.com",
+      emailPlaceholder: "####",
       messageLabel: "Message",
       messagePlaceholder: "What's on your mind?",
       submit: "Send message",
@@ -246,9 +246,9 @@ const translations = {
       description:
         "Har du en fråga eller vill bara säga hej? Fyll i det här, så öppnas din e-postklient med allt klart att skicka.",
       nameLabel: "Ditt namn",
-      namePlaceholder: "Jane Doe",
+      namePlaceholder: "Ditt namn",
       emailLabel: "Din e-post",
-      emailPlaceholder: "jane@example.com",
+      emailPlaceholder: "####",
       messageLabel: "Meddelande",
       messagePlaceholder: "Vad tänker du på?",
       submit: "Skicka meddelande",
