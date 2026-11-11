@@ -69,7 +69,12 @@ export default function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm font-medium sm:flex">
-          <Link href="/about" className={`transition-colors ${linkColor}`}>
+          <Link
+            href="/about"
+            className={`transition-colors ${linkColor} ${
+              pathname === "/about" ? "underline underline-offset-4" : ""
+            }`}
+          >
             {t("nav.about")}
           </Link>
           <Link
