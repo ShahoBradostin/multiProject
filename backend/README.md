@@ -1,8 +1,8 @@
 # Backend
 
 Python backend for the portfolio, built with FastAPI. Serves the Kanban board's
-data, the calorie tracker's logged entries, and a reference food database, all
-persisted in MySQL.
+data and the calorie tracker's logged entries, persisted in MySQL, plus a
+reference food database read from a local JSON file.
 
 ## Setup
 
@@ -49,11 +49,11 @@ Cards/entries saved before accounts existed have no `userId` and are simply inac
 
 - `GET /foods?q=&lang=en|sv&limit=50`: search the reference food database (name substring match, case-insensitive), returns up to `limit` results sorted alphabetically: `{ "number": int, "name": string, "calories": number, "protein": number, "carbs": number }`
 
-Backed by the `food_database` table (~2600 rows, Swedish + English names,
-values per 100g), originally fetched from Livsmedelsverket's open API (CC BY
-4.0) via `scripts/fetch_food_database.py`. That script still writes a JSON
-file rather than the table directly, re-fetching data would need a one-off
-script to load it into `food_database` (not currently written).
+Backed by `data/food_database.json` (~2600 entries, Swedish + English names,
+values per 100g), fetched from Livsmedelsverket's open API (CC BY 4.0) via
+`scripts/fetch_food_database.py`. The file is read and filtered fresh on
+every request, no caching: it rarely changes and is small enough that this
+isn't a performance concern. Re-run the fetch script to refresh it.
 
 ## Auth
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { getFoodDatabase, type FoodDatabaseEntry } from "./foodDatabase";
+import { searchFoodDatabase, type FoodDatabaseEntry } from "./foodDatabase";
 
-const RESULTS_LIMIT = 50;
+const DEBOUNCE_MS = 250;
 
 export default function FoodSearch({
   onSelect,
@@ -13,36 +13,30 @@ export default function FoodSearch({
 }) {
   const { t, language } = useLanguage();
   const [query, setQuery] = useState("");
-  const [foods, setFoods] = useState<FoodDatabaseEntry[]>([]);
+  const [results, setResults] = useState<FoodDatabaseEntry[]>([]);
   const [error, setError] = useState(false);
 
-  // Loads the (cached, see foodDatabase.ts) full list once per language
-  // as the external-sync case useEffect exists for; searching below just
-  // filters this in memory, no request per keystroke.
+  // Debounced fetch from the backend as the external-sync case useEffect
+  // exists for; the AbortController drops stale responses if query/language
+  // change again before the previous request resolves.
   useEffect(() => {
-    let cancelled = false;
-    getFoodDatabase(language)
-      .then((data) => {
-        if (!cancelled) {
-          setFoods(data);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      searchFoodDatabase(query, language, controller.signal)
+        .then((data) => {
+          setResults(data);
           setError(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setError(true);
-      });
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") return;
+          setError(true);
+        });
+    }, DEBOUNCE_MS);
     return () => {
-      cancelled = true;
+      clearTimeout(timeout);
+      controller.abort();
     };
-  }, [language]);
-
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const matches = q
-      ? foods.filter((food) => food.name.toLowerCase().includes(q))
-      : foods;
-    return matches.slice(0, RESULTS_LIMIT);
-  }, [foods, query]);
+  }, [query, language]);
 
   return (
     <div className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-surface p-4">

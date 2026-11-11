@@ -1,5 +1,7 @@
 import datetime
+import json
 import uuid
+from pathlib import Path
 from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -204,7 +206,8 @@ class FoodDatabaseEntry(BaseModel):
     carbs: float
 
 
-_NAME_COLUMN: dict[Lang, str] = {"en": "name_en", "sv": "name_sv"}
+_NAME_KEY: dict[Lang, str] = {"en": "nameEn", "sv": "nameSv"}
+FOOD_DATABASE_FILE = Path(__file__).parent / "data" / "food_database.json"
 
 
 @app.get("/foods", response_model=list[FoodDatabaseEntry])
@@ -214,14 +217,18 @@ def search_foods(
     limit: int = 50,
     user: auth.User = Depends(auth.require_user),
 ) -> list[FoodDatabaseEntry]:
-    name_column = _NAME_COLUMN[lang]
-    query = q.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-    with db.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute(
-            f"SELECT number, {name_column} AS name, calories, protein, carbs "
-            f"FROM food_database WHERE {name_column} LIKE %s "
-            f"ORDER BY {name_column} LIMIT %s",
-            (f"%{query}%", limit),
+    name_key = _NAME_KEY[lang]
+    foods = json.loads(FOOD_DATABASE_FILE.read_text(encoding="utf-8"))
+    query = q.strip().lower()
+    matches = [food for food in foods if query in food[name_key].lower()]
+    matches.sort(key=lambda food: food[name_key])
+    return [
+        FoodDatabaseEntry(
+            number=food["number"],
+            name=food[name_key],
+            calories=food["calories"],
+            protein=food["protein"],
+            carbs=food["carbs"],
         )
-        rows = cursor.fetchall()
-    return [FoodDatabaseEntry(**row) for row in rows]
+        for food in matches[:limit]
+    ]

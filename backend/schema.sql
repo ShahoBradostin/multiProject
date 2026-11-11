@@ -37,12 +37,3 @@ CREATE TABLE food_entries (
     user_id CHAR(32) NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
-
-CREATE TABLE food_database (
-    number INT PRIMARY KEY,
-    name_en VARCHAR(255) NOT NULL,
-    name_sv VARCHAR(255) NOT NULL,
-    calories FLOAT NOT NULL,
-    protein FLOAT NOT NULL,
-    carbs FLOAT NOT NULL
-);
