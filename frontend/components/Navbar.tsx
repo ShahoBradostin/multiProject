@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useAuth } from "@/lib/auth/AuthContext";
 
@@ -31,17 +31,6 @@ export default function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  function handleContactClick(e: MouseEvent<HTMLAnchorElement>) {
-    // If we're already on "/", the URL hash won't change on a repeat click
-    // (e.g. after scrolling back up), so the browser never re-fires the
-    // hash-scroll. Scroll manually instead of relying on that.
-    if (window.location.pathname !== "/") return;
-    e.preventDefault();
-    document
-      .getElementById("contact")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
 
   const linkColor = isTransparent
     ? "text-white/80 hover:text-white"
@@ -78,9 +67,10 @@ export default function Navbar() {
             {t("nav.about")}
           </Link>
           <Link
-            href="/#contact"
-            onClick={handleContactClick}
-            className={`transition-colors ${linkColor}`}
+            href="/contact"
+            className={`transition-colors ${linkColor} ${
+              pathname === "/contact" ? "underline underline-offset-4" : ""
+            }`}
           >
             {t("nav.contact")}
           </Link>

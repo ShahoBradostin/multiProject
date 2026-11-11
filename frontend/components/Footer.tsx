@@ -28,7 +28,7 @@ export default function Footer() {
               {t("nav.about")}
             </Link>
             <Link
-              href="/#contact"
+              href="/contact"
               className="text-sm text-muted transition-colors hover:text-accent"
             >
               {t("nav.contact")}
