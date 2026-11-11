@@ -68,16 +68,14 @@ export default function Navbar() {
           Shapo
         </Link>
 
-        <nav
-          className={`hidden items-center gap-8 text-sm font-medium sm:flex ${linkColor}`}
-        >
-          <Link href="/about" className="transition-colors">
+        <nav className="hidden items-center gap-8 text-sm font-medium sm:flex">
+          <Link href="/about" className={`transition-colors ${linkColor}`}>
             {t("nav.about")}
           </Link>
           <Link
             href="/#contact"
             onClick={handleContactClick}
-            className="transition-colors"
+            className={`transition-colors ${linkColor}`}
           >
             {t("nav.contact")}
           </Link>
