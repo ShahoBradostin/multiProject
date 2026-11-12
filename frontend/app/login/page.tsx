@@ -5,6 +5,7 @@ import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthLayout from "@/components/AuthLayout";
 import FadeIn from "@/components/FadeIn";
+import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useAuth, type AuthErrorCode } from "@/lib/auth/AuthContext";
 
@@ -64,13 +65,14 @@ function LoginForm() {
           <label className="text-xs text-muted">
             {t("auth.passwordLabel")}
           </label>
-          <input
-            type="password"
+          <PasswordInput
             required
             autoComplete="current-password"
             placeholder={t("auth.passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            showLabel={t("auth.showPasswordAria")}
+            hideLabel={t("auth.hidePasswordAria")}
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
           />
         </div>
