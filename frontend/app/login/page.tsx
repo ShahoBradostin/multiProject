@@ -68,6 +68,7 @@ function LoginForm() {
             type="password"
             required
             autoComplete="current-password"
+            placeholder={t("auth.passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"

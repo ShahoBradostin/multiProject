@@ -23,6 +23,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showPasswordHint, setShowPasswordHint] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -76,13 +77,31 @@ export default function RegisterPage() {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs text-muted">
-              {t("auth.passwordLabel")}
-            </label>
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs text-muted">
+                {t("auth.passwordLabel")}
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordHint((shown) => !shown)}
+                  aria-label={t("auth.passwordHintAria")}
+                  className="flex h-4 w-4 items-center justify-center rounded-full border border-muted text-[10px] font-bold leading-none text-muted transition-colors hover:border-accent hover:text-accent"
+                >
+                  !
+                </button>
+                {showPasswordHint && (
+                  <div className="absolute left-1/2 top-full z-10 mt-2 w-48 -translate-x-1/2 rounded-lg bg-white px-3 py-2 text-xs text-gray-900 shadow-lg">
+                    {t("auth.passwordTooShort")}
+                  </div>
+                )}
+              </div>
+            </div>
             <input
               type="password"
               required
               autoComplete="new-password"
+              placeholder={t("auth.passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
