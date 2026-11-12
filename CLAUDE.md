@@ -43,6 +43,7 @@ General pattern right now:
 - Never use em dashes ("—") in code, docs, UI copy, or commit messages. Use ",", ".", or ":" instead.
 - Create a new branch before starting a work session/feature, don't work directly on `main`.
 - Don't add abstractions, error handling, or functionality beyond what's actually requested.
+- Never run `git commit` without asking the user first and getting a clear yes, even mid-session after earlier commits were approved. Each commit needs its own go-ahead.
 
 ## Deployment (planned, not started yet)
 

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import AuthLayout from "@/components/AuthLayout";
 import FadeIn from "@/components/FadeIn";
 import PasswordInput from "@/components/PasswordInput";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -100,10 +99,8 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <AuthLayout>
-      <Suspense fallback={null}>
-        <LoginForm />
-      </Suspense>
-    </AuthLayout>
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }
