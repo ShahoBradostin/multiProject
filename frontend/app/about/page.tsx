@@ -7,52 +7,65 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const EXPERIENCE = [
   {
+    role: "Full-Stack Developer",
+    company: "Thea Labs",
+    location: "Malmö",
+    period: "Feb 2026 – Present",
+    bullets: [
+      "Conducted UX research, including user interviews and usability testing, to inform interface design decisions.",
+      "Designed UI prototypes in Figma and implemented them as working frontend interfaces.",
+      "Wrote backend Python scripts to support data processing workflows.",
+      "Worked as part of a small, cross-functional team spanning engineering, research, and design.",
+    ],
+    link: "https://thealabs.se",
+  },
+  {
     role: "Frontend Developer",
     company: "Precise Biometrics",
     location: "Lund",
     period: "Sept 2025 – Jan 2026",
     bullets: [
-      "Solo developer responsible for redesigning an existing website.",
-      "Fixed front-end bugs and improved UI responsiveness across mobile and desktop.",
-      "Worked with legacy systems to achieve the new design.",
-      "Provided visual presentations using Figma.",
+      "Sole developer responsible for redesigning the company's existing website, from concept to deployment.",
+      "Diagnosed and fixed frontend bugs, improving responsive behavior across mobile and desktop breakpoints.",
+      "Integrated the new design into legacy systems without disrupting existing functionality.",
+      "Designed and presented UI prototypes in Figma for stakeholder review and approval.",
     ],
     link: "https://precise-biometrics.starwebserver.se/",
   },
   {
-    role: "Project Manager",
+    role: "Project Manager and Developer",
     company: "Cura-Ami",
     location: "Malmö",
     period: "Sept 2025 – Jan 2026",
     bullets: [
-      "Formally responsible for the project: planning, budgeting, risk management, timelines, team coordination, and delivery.",
-      "Led project meetings, facilitated communication, and ensured smooth collaboration within the team.",
-      "Defined project goals, scope, and requirements together with the team and stakeholders.",
-      "Contributed to both frontend and backend development of the app and admin page.",
+      "Held formal project responsibility: planning, budgeting, risk management, timelines, and team coordination.",
+      "Led project meetings and aligned the team and stakeholders around goals, scope, and requirements.",
+      "Contributed hands-on to frontend and backend development of the mobile app and admin page.",
+      "Participated in testing and quality assurance to support a stable release.",
     ],
     link: "https://apps.apple.com/gm/app/cura-ami/id6743929376",
   },
   {
-    role: "Fullstack Developer",
+    role: "Full-Stack Developer",
     company: "DoskiFlix",
     location: "Malmö",
     period: "Sept 2024 – Dec 2024",
     bullets: [
-      "Developed a movie application using Next.js and Tailwind CSS.",
-      "Built a mashup service integrating RESTful APIs, including OMDB and the ChatGPT API.",
-      "Users receive five recommended movies based on their likes and dislikes.",
+      "Developed a movie recommendation web application using Next.js and Tailwind CSS.",
+      "Built a mashup service integrating RESTful APIs, including the OMDb API and the OpenAI ChatGPT API.",
+      "Designed a recommendation feature that suggests five films to each user based on their likes and dislikes.",
     ],
     link: "https://github.com/RayanDoski/DoskiFlix",
   },
   {
-    role: "Database Specialist",
+    role: "Database Developer",
     company: "Schedular",
     location: "Malmö",
     period: "Sept 2024 – Dec 2024",
     bullets: [
-      "Shared responsibility across all sections of the project, with a particular focus on the database.",
-      "Fixed code across the stack: frontend (CSS), backend (Python), and database (PostgreSQL).",
-      "Took part in daily scrum meetings to keep development moving smoothly.",
+      "Team project with shared ownership across all layers; led database design in PostgreSQL.",
+      "Fixed issues spanning the frontend (CSS), backend (Python), and database (PostgreSQL).",
+      "Worked in an Agile Scrum process with daily stand-up meetings.",
     ],
     link: "https://github.com/Sharqawi02/Schedular",
   },
@@ -65,7 +78,7 @@ const SKILL_GROUPS = [
   },
   {
     heading: "Tools & Frameworks",
-    items: ["Bootstrap", "React", "Next.js", "Tailwind CSS"],
+    items: ["Bootstrap", "React", "Next.js", "Tailwind CSS", "PostgreSQL"],
   },
   {
     heading: "Other Skills",
@@ -75,6 +88,8 @@ const SKILL_GROUPS = [
       "Prototyping",
       "Figma",
       "Information Security",
+      "REST APIs",
+      "Project Management",
       "AJAX",
       "jQuery",
       "Tableau",
@@ -110,9 +125,9 @@ export default function AboutPage() {
 
       <FadeIn delayMs={100} className="flex flex-col gap-4 text-muted">
         <p>
-          Hi, I&apos;m Shapo, a software developer finishing my Bachelor&apos;s
+          Hi, I'm Shapo, a software developer finishing my Bachelor's
           in Computer and Information Science at Malmö University. I care about
-          building products that are genuinely pleasant to use, and I&apos;m
+          building products that are genuinely pleasant to use, and I'm
           endlessly curious about how AI can make both the software we build and
           the way we build it better.
         </p>
@@ -120,16 +135,16 @@ export default function AboutPage() {
           My background spans the full stack, from pixel-level frontend polish
           to backend logic and database design, with a healthy dose of UX
           research and prototyping mixed in. I like being the person who can sit
-          with a messy legacy codebase, understand what it&apos;s actually
-          trying to do, and quietly make it better, whether that&apos;s fixing a
+          with a messy legacy codebase, understand what it's actually
+          trying to do, and quietly make it better, whether that's fixing a
           stubborn responsiveness bug, redesigning a page in Figma, or
           untangling a gnarly SQL query.
         </p>
         <p>
-          I&apos;ve had the chance to wear a lot of hats: leading a project end
+          I've had the chance to wear a lot of hats: leading a project end
           to end as a project manager, going deep on a single feature as a solo
           frontend developer, and everything in between. What ties it together
-          is that I show up, ask good questions, and don&apos;t stop until the
+          is that I show up, ask good questions, and don't stop until the
           thing actually works.
         </p>
       </FadeIn>
@@ -221,7 +236,7 @@ export default function AboutPage() {
         delayMs={300}
         className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-surface p-8 text-center"
       >
-        <p className="text-muted">Want to work together or just say hi?</p>
+        <p className="text-muted">If you have any questions or just want to say hi</p>
         <Link
           href="/contact"
           className="rounded-none bg-accent-button px-4 py-2 text-sm font-medium text-accent-button-foreground transition-colors hover:bg-accent-button-hover"

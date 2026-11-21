@@ -30,7 +30,8 @@ General pattern right now:
 
 ## Post-task review
 
-- After finishing a coding task, spawn another agent acting as a coding and architecture specialist to review the work, and have it do this 3 times (3 separate review passes).
+- Do not run review passes automatically after finishing a coding task. Only do this when the user explicitly asks for a review.
+- When asked, spawn another agent acting as a coding and architecture specialist to review the work, and have it do this 3 times (3 separate review passes).
 - Each pass gives the code a rating from 1-8:
   - 1-3: low quality
   - 4-5: medium quality

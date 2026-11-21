@@ -33,6 +33,12 @@ export default function Footer() {
             >
               {t("home.caloriesTitle")}
             </Link>
+            <Link
+              href="/expenses"
+              className="text-sm text-muted transition-colors hover:text-accent"
+            >
+              {t("home.expensesTitle")}
+            </Link>
             <span
               className="cursor-default text-sm text-muted opacity-70"
               title="Placeholder"

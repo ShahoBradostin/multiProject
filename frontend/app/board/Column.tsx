@@ -40,7 +40,7 @@ export default function Column({
       }}
       onDragLeave={() => setIsOver(false)}
       onDrop={handleDrop}
-      className={`flex w-full flex-col gap-3 rounded-2xl border p-4 transition-colors ${
+      className={`flex w-full flex-col gap-3 rounded-none border p-4 transition-colors ${
         isOver ? "border-accent bg-accent/5" : "border-border bg-surface"
       }`}
     >

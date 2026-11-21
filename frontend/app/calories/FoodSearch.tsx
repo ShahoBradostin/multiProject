@@ -39,7 +39,7 @@ export default function FoodSearch({
   }, [query, language]);
 
   return (
-    <div className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-surface p-4">
+    <div className="flex h-full flex-col gap-3 rounded-none border border-border bg-surface p-4">
       <h2 className="text-sm font-semibold text-foreground">
         {t("foodSearch.heading")}
       </h2>
@@ -63,7 +63,7 @@ export default function FoodSearch({
                 key={food.number}
                 type="button"
                 onClick={() => onSelect(food)}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2 text-left text-sm shadow-sm transition-colors hover:border-accent"
+                className="flex items-center justify-between gap-2 rounded-none border border-border bg-background px-3 py-2 text-left text-sm shadow-sm transition-colors hover:border-accent"
               >
                 <span className="text-foreground">{food.name}</span>
                 <span className="flex shrink-0 items-center gap-2 text-xs text-muted">

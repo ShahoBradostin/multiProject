@@ -1,4 +1,5 @@
 import datetime
+import os
 import uuid
 
 import bcrypt
@@ -10,6 +11,14 @@ import db
 
 SESSION_COOKIE = "session_token"
 SESSION_TTL = datetime.timedelta(days=7)
+# Cookies can only be marked Secure once the site is served over HTTPS;
+# locally that's plain HTTP, so this defaults off and gets flipped on via
+# env var once deployed.
+COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
+
+LOGIN_RATE_LIMIT = 10
+LOGIN_RATE_WINDOW = datetime.timedelta(minutes=1)
+_login_attempts: dict[str, list[datetime.datetime]] = {}
 
 
 class User(BaseModel):
@@ -37,9 +46,11 @@ class RegisterRequest(BaseModel):
 
     @field_validator("password")
     @classmethod
-    def password_long_enough(cls, v: str) -> str:
+    def password_meets_requirements(cls, v: str) -> str:
         if len(v) < 8:
             raise ValueError("Password must be at least 8 characters")
+        if not any(c.isupper() for c in v):
+            raise ValueError("Password must contain at least one uppercase letter")
         return v
 
 
@@ -133,10 +144,29 @@ def _set_session_cookie(response: Response, token: str, expires_at: datetime.dat
         key=SESSION_COOKIE,
         value=token,
         httponly=True,
+        secure=COOKIE_SECURE,
         samesite="lax",
         expires=expires_at,
         path="/",
     )
+
+
+def _suggest_username(base: str) -> str:
+    suffix = 1
+    while get_user_by_username(f"{base}{suffix}") is not None:
+        suffix += 1
+    return f"{base}{suffix}"
+
+
+def _check_login_rate_limit(ip: str) -> None:
+    now = datetime.datetime.now(datetime.timezone.utc)
+    recent = [t for t in _login_attempts.get(ip, []) if now - t < LOGIN_RATE_WINDOW]
+    recent.append(now)
+    _login_attempts[ip] = recent
+    if len(recent) > LOGIN_RATE_LIMIT:
+        raise HTTPException(
+            status_code=429, detail="Too many login attempts. Try again in a minute."
+        )
 
 
 router = APIRouter(prefix="/auth")
@@ -153,7 +183,13 @@ def register(payload: RegisterRequest, response: Response) -> UserPublic:
     try:
         insert_user(user)
     except pymysql.err.IntegrityError:
-        raise HTTPException(status_code=400, detail="Username already taken")
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "username_taken",
+                "suggestion": _suggest_username(payload.username),
+            },
+        )
 
     token, expires_at = create_session(user.id)
     _set_session_cookie(response, token, expires_at)
@@ -161,7 +197,9 @@ def register(payload: RegisterRequest, response: Response) -> UserPublic:
 
 
 @router.post("/login", response_model=UserPublic)
-def login(payload: LoginRequest, response: Response) -> UserPublic:
+def login(payload: LoginRequest, request: Request, response: Response) -> UserPublic:
+    _check_login_rate_limit(request.client.host if request.client else "unknown")
+
     user = get_user_by_username(payload.username)
     if user is None or not verify_password(payload.password, user.passwordHash):
         raise HTTPException(status_code=401, detail="Invalid username or password")

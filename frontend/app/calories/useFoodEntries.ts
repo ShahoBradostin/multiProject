@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { apiFetch, API_BASE } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import type { FoodEntry } from "./types";
 
 export function useFoodEntries() {
@@ -19,7 +19,7 @@ export function useFoodEntries() {
       setEntries(data);
       setError(null);
     } catch {
-      setError(t("calories.backendError", { url: API_BASE }));
+      setError(t("calories.backendError"));
     } finally {
       setLoading(false);
     }

@@ -6,26 +6,94 @@ import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useAuth } from "@/lib/auth/AuthContext";
 
-const UPCOMING_PROJECT_NUMBERS = [1, 2, 3];
+const UPCOMING_PROJECT_NUMBERS = [1, 2];
 
-const LOREM_SHORT =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+function iconProps(className: string) {
+  return {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.5,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    className,
+  };
+}
 
-const LOREM_LONG =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
+function CodeIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg {...iconProps(className)}>
+      <path d="M8 6 3 12l5 6" />
+      <path d="m16 6 5 6-5 6" />
+    </svg>
+  );
+}
 
-const FEATURE_BLURBS = [
+function WindowIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg {...iconProps(className)}>
+      <rect x="3" y="4" width="18" height="16" rx="1.5" />
+      <path d="M3 9h18" />
+    </svg>
+  );
+}
+
+function ServerIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg {...iconProps(className)}>
+      <rect x="3" y="4" width="18" height="6" rx="1.5" />
+      <rect x="3" y="14" width="18" height="6" rx="1.5" />
+      <path d="M7 7h.01" />
+      <path d="M7 17h.01" />
+    </svg>
+  );
+}
+
+function DatabaseIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg {...iconProps(className)}>
+      <ellipse cx="12" cy="6" rx="8" ry="3" />
+      <path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6" />
+      <path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
+    </svg>
+  );
+}
+
+function BlueprintIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg {...iconProps(className)}>
+      <rect x="4" y="4" width="16" height="16" rx="1.5" strokeDasharray="3 3" />
+      <path d="M12 9v6" />
+      <path d="M9 12h6" />
+    </svg>
+  );
+}
+
+function SproutIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg {...iconProps(className)}>
+      <path d="M12 21v-9" />
+      <path d="M12 12C12 8 9 6 5 6c0 4 3 7 7 7" />
+      <path d="M12 12c0-3 2.5-5 6-5 0 3.5-2.5 6-6 6" />
+    </svg>
+  );
+}
+
+const PILLAR_KEYS = [
   {
-    heading: "Consectetur Adipiscing",
-    body: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    heading: "home.pillarFrontendHeading",
+    body: "home.pillarFrontendBody",
+    Icon: WindowIcon,
   },
   {
-    heading: "Sed Do Eiusmod",
-    body: "Curabitur pretium tincidunt lacus, ut interdum tellus elit sed risus. Maecenas eget condimentum velit.",
+    heading: "home.pillarBackendHeading",
+    body: "home.pillarBackendBody",
+    Icon: ServerIcon,
   },
   {
-    heading: "Ut Labore Dolore",
-    body: "Sit amet mattis vulputate enim nulla aliquet porttitor lacus luctus accumsan tortor posuere praesent.",
+    heading: "home.pillarDatabaseHeading",
+    body: "home.pillarDatabaseBody",
+    Icon: DatabaseIcon,
   },
 ];
 
@@ -121,8 +189,30 @@ export default function Home() {
             </Link>
           </FadeIn>
 
+          <FadeIn delayMs={200}>
+            <Link
+              href="/expenses"
+              className="group relative block aspect-square overflow-hidden bg-surface"
+            >
+              <img
+                src="/projects/expenses.jpg"
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+              <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-5">
+                <h2 className="font-serif text-lg text-white sm:text-xl">
+                  {t("home.expensesTitle")}
+                </h2>
+                <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-white/80 sm:text-sm">
+                  {t("home.openExpenses")} <span aria-hidden>→</span>
+                </span>
+              </div>
+            </Link>
+          </FadeIn>
+
           {UPCOMING_PROJECT_NUMBERS.map((n, index) => (
-            <FadeIn key={n} delayMs={200 + index * 50}>
+            <FadeIn key={n} delayMs={250 + index * 50}>
               <div className="group relative flex aspect-square cursor-default flex-col justify-end overflow-hidden border border-border bg-surface p-4 sm:p-5">
                 <ImagePlaceholder
                   className="absolute inset-0 border-none uppercase tracking-wide"
@@ -142,10 +232,11 @@ export default function Home() {
       <section className="w-full bg-surface">
         <FadeIn className="mx-auto flex max-w-5xl flex-col items-center gap-10 px-6 py-20 text-left sm:px-16 md:flex-row">
           <div className="flex flex-1 flex-col gap-4">
+            <CodeIcon className="h-8 w-8 text-accent" />
             <h2 className="font-serif text-3xl text-foreground">
-              Lorem Ipsum Dolor Sit Amet
+              {t("home.realSoftwareHeading")}
             </h2>
-            <p className="text-muted">{LOREM_LONG}</p>
+            <p className="text-muted">{t("home.realSoftwareBody")}</p>
           </div>
           <ImagePlaceholder className="aspect-[4/3] w-full flex-1" />
         </FadeIn>
@@ -154,15 +245,16 @@ export default function Home() {
       <section className="w-full bg-background">
         <FadeIn className="mx-auto flex max-w-5xl flex-col items-center gap-10 px-6 py-20 text-center sm:px-16">
           <h2 className="font-serif text-3xl text-foreground">
-            Consectetur Adipiscing Elit
+            {t("home.howItWorksHeading")}
           </h2>
           <div className="grid w-full grid-cols-1 gap-6 text-left sm:grid-cols-3">
-            {FEATURE_BLURBS.map((item) => (
+            {PILLAR_KEYS.map((item) => (
               <div key={item.heading} className="flex flex-col gap-2">
+                <item.Icon className="h-7 w-7 text-accent" />
                 <h3 className="font-serif text-xl text-foreground">
-                  {item.heading}
+                  {t(item.heading)}
                 </h3>
-                <p className="text-sm text-muted">{item.body}</p>
+                <p className="text-sm text-muted">{t(item.body)}</p>
               </div>
             ))}
           </div>
@@ -173,20 +265,22 @@ export default function Home() {
         <FadeIn className="mx-auto flex max-w-5xl flex-col items-center gap-10 px-6 py-20 text-left sm:px-16 md:flex-row">
           <ImagePlaceholder className="aspect-[4/3] w-full flex-1 md:order-first" />
           <div className="flex flex-1 flex-col gap-4">
+            <BlueprintIcon className="h-8 w-8 text-accent" />
             <h2 className="font-serif text-3xl text-foreground">
-              Sed Do Eiusmod Tempor
+              {t("home.moreProjectsHeading")}
             </h2>
-            <p className="text-muted">{LOREM_LONG}</p>
+            <p className="text-muted">{t("home.moreProjectsBody")}</p>
           </div>
         </FadeIn>
       </section>
 
       <section className="w-full bg-surface">
         <FadeIn className="mx-auto flex max-w-5xl flex-col items-center gap-8 px-6 py-20 text-center sm:px-16">
+          <SproutIcon className="h-8 w-8 text-accent" />
           <h2 className="font-serif text-3xl text-foreground">
-            Ut Enim Ad Minim Veniam
+            {t("home.stillTakingShapeHeading")}
           </h2>
-          <p className="max-w-2xl text-muted">{LOREM_SHORT}</p>
+          <p className="max-w-2xl text-muted">{t("home.stillTakingShapeBody")}</p>
           <ImagePlaceholder className="aspect-video w-full" />
         </FadeIn>
       </section>

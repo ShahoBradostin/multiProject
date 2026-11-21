@@ -83,7 +83,7 @@ export default function CaloriesPage() {
           <div className="flex flex-col gap-8">
             <FadeIn
               delayMs={100}
-              className="grid grid-cols-3 gap-4 rounded-2xl border border-border bg-surface p-4"
+              className="grid grid-cols-3 gap-4 rounded-none border border-border bg-surface p-4"
             >
               <div className="flex flex-col items-center gap-1">
                 <span className="text-2xl font-semibold text-foreground">
@@ -114,7 +114,7 @@ export default function CaloriesPage() {
             <FadeIn delayMs={150}>
               <form
                 onSubmit={handleSubmit}
-                className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 sm:flex-row sm:items-end sm:flex-wrap"
+                className="flex flex-col gap-3 rounded-none border border-border bg-surface p-4 sm:flex-row sm:items-end sm:flex-wrap"
               >
                 <div className="flex flex-1 flex-col gap-1 sm:min-w-[10rem]">
                   <label className="text-xs text-muted">
@@ -183,7 +183,7 @@ export default function CaloriesPage() {
                 todaysEntries.map((entry) => (
                   <div
                     key={entry.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm shadow-sm"
+                    className="flex items-center justify-between gap-2 rounded-none border border-border bg-background px-3 py-2 text-sm shadow-sm"
                   >
                     <span className="text-foreground">{entry.name}</span>
                     <div className="flex items-center gap-3 text-xs text-muted">

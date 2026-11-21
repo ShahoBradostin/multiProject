@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { API_BASE } from "@/lib/api";
+import { BACKEND_URL } from "@/lib/api";
 
 const PUBLIC_PATHS = ["/login", "/register"];
 
@@ -22,7 +22,7 @@ export async function proxy(request: NextRequest) {
 
   const token = request.cookies.get("session_token")?.value;
   const isValid = token
-    ? await fetch(`${API_BASE}/auth/me`, {
+    ? await fetch(`${BACKEND_URL}/auth/me`, {
         headers: { Cookie: `session_token=${token}` },
       })
         .then((res) => res.ok)

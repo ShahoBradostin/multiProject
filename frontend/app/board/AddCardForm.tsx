@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import Select from "./Select";
+import Select from "@/components/Select";
 import { COLUMN_IDS, PRIORITIES } from "./constants";
 import type { ColumnId, Priority } from "./types";
 
@@ -46,7 +46,7 @@ export default function AddCardForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-full flex-col gap-3 rounded-2xl border border-border bg-surface p-4"
+      className="flex w-full flex-col gap-3 rounded-none border border-border bg-surface p-4"
     >
       <h2 className="text-sm font-semibold text-foreground">
         {t("board.newCardHeading")}

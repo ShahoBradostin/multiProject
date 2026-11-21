@@ -3,7 +3,7 @@
 import { useState, type DragEvent, type KeyboardEvent } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { PRIORITIES, PRIORITY_STYLES } from "./constants";
-import Select from "./Select";
+import Select from "@/components/Select";
 import type { Card as CardType, Priority } from "./types";
 
 export default function Card({
@@ -54,7 +54,7 @@ export default function Card({
     <div
       draggable={!isEditingTitle}
       onDragStart={handleDragStart}
-      className="group flex cursor-grab items-start justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm shadow-sm active:cursor-grabbing"
+      className="group flex cursor-grab items-start justify-between gap-2 rounded-none border border-border bg-background px-3 py-2 text-sm shadow-sm active:cursor-grabbing"
     >
       <div className="flex flex-1 flex-col items-start gap-1.5">
         {isEditingTitle ? (

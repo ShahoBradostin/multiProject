@@ -1,5 +1,11 @@
-export const API_BASE =
-  process.env.NEXT_PUBLIC_KANBAN_API_URL ?? "http://localhost:8000";
+// Relative, so browser requests stay same-origin and go through the
+// rewrite in next.config.ts instead of crossing to the backend's own
+// domain (which would make the session cookie subject to SameSite rules).
+export const API_BASE = "/api";
+
+// Used server-side only (middleware, next.config.ts), where a relative
+// path can't be used as a fetch target and same-origin doesn't apply.
+export const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8000";
 
 // All data endpoints require a session now. A 401 means it expired or was
 // never there (e.g. the tab was left open across a logout elsewhere), so

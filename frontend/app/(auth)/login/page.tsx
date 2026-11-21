@@ -11,6 +11,7 @@ import { useAuth, type AuthErrorCode } from "@/lib/auth/AuthContext";
 const ERROR_KEYS: Record<AuthErrorCode, string> = {
   usernameTaken: "auth.errorUsernameTaken",
   invalidCredentials: "auth.errorInvalidCredentials",
+  rateLimited: "auth.errorRateLimited",
   generic: "auth.errorGeneric",
 };
 
@@ -38,52 +39,54 @@ function LoginForm() {
   }
 
   return (
-    <FadeIn className="mx-auto flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-border bg-surface p-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-serif text-2xl text-foreground">
-          {t("auth.loginTitle")}
-        </h1>
-        <p className="text-sm text-muted">{t("auth.loginDescription")}</p>
+    <FadeIn className="mx-auto flex min-h-[404px] w-full max-w-sm flex-col justify-between gap-4 rounded-2xl border border-border bg-surface p-6">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-serif text-2xl text-foreground">
+            {t("auth.loginTitle")}
+          </h1>
+          <p className="text-sm text-muted">{t("auth.loginDescription")}</p>
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted">
+              {t("auth.usernameLabel")}
+            </label>
+            <input
+              type="text"
+              required
+              autoComplete="username"
+              placeholder={t("auth.usernamePlaceholder")}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted">
+              {t("auth.passwordLabel")}
+            </label>
+            <PasswordInput
+              required
+              autoComplete="current-password"
+              placeholder={t("auth.passwordPlaceholder")}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              showLabel={t("auth.showPasswordAria")}
+              hideLabel={t("auth.hidePasswordAria")}
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+            />
+          </div>
+          {error && <p className="text-sm text-red-600">{t(ERROR_KEYS[error])}</p>}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="rounded-none bg-accent-button px-4 py-2 text-sm font-medium text-accent-button-foreground transition-colors hover:bg-accent-button-hover disabled:opacity-60"
+          >
+            {t("auth.submitLogin")}
+          </button>
+        </form>
       </div>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted">
-            {t("auth.usernameLabel")}
-          </label>
-          <input
-            type="text"
-            required
-            autoComplete="username"
-            placeholder={t("auth.usernamePlaceholder")}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted">
-            {t("auth.passwordLabel")}
-          </label>
-          <PasswordInput
-            required
-            autoComplete="current-password"
-            placeholder={t("auth.passwordPlaceholder")}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            showLabel={t("auth.showPasswordAria")}
-            hideLabel={t("auth.hidePasswordAria")}
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
-          />
-        </div>
-        {error && <p className="text-sm text-red-600">{t(ERROR_KEYS[error])}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-none bg-accent-button px-4 py-2 text-sm font-medium text-accent-button-foreground transition-colors hover:bg-accent-button-hover disabled:opacity-60"
-        >
-          {t("auth.submitLogin")}
-        </button>
-      </form>
       <p className="text-sm text-muted">
         {t("auth.noAccount")}{" "}
         <Link

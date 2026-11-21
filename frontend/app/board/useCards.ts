@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { apiFetch, API_BASE } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import type { Card, ColumnId, Priority } from "./types";
 
 export function useCards() {
@@ -19,7 +19,7 @@ export function useCards() {
       setCards(data);
       setError(null);
     } catch {
-      setError(t("board.backendError", { url: API_BASE }));
+      setError(t("board.backendError"));
     } finally {
       setLoading(false);
     }

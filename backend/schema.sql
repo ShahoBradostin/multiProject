@@ -37,3 +37,25 @@ CREATE TABLE food_entries (
     user_id CHAR(32) NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
+
+-- Expense tracker. Unlike cards/food_entries, user_id is required here (no
+-- legacy pre-auth rows to account for), so every row always has an owner.
+CREATE TABLE transactions (
+    id CHAR(32) PRIMARY KEY,
+    type ENUM('income', 'expense') NOT NULL,
+    category ENUM('food', 'rent', 'transport', 'utilities', 'subscriptions', 'entertainment', 'other') NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    date DATE NOT NULL,
+    user_id CHAR(32) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE budgets (
+    id CHAR(32) PRIMARY KEY,
+    category ENUM('food', 'rent', 'transport', 'utilities', 'subscriptions', 'entertainment', 'other') NOT NULL,
+    monthly_limit DECIMAL(10, 2) NOT NULL,
+    user_id CHAR(32) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_category (user_id, category)
+);

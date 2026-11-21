@@ -16,9 +16,15 @@ export type AuthUser = {
   username: string;
 };
 
-export type AuthErrorCode = "usernameTaken" | "invalidCredentials" | "generic";
+export type AuthErrorCode =
+  | "usernameTaken"
+  | "invalidCredentials"
+  | "rateLimited"
+  | "generic";
 
-type AuthResult = { ok: true } | { ok: false; errorCode: AuthErrorCode };
+type AuthResult =
+  | { ok: true }
+  | { ok: false; errorCode: AuthErrorCode; suggestion?: string };
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -30,14 +36,18 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-async function registerErrorCode(res: Response): Promise<AuthErrorCode> {
+async function registerErrorInfo(
+  res: Response,
+): Promise<{ errorCode: AuthErrorCode; suggestion?: string }> {
   try {
     const body = await res.json();
-    if (body.detail === "Username already taken") return "usernameTaken";
+    if (body.detail?.code === "username_taken") {
+      return { errorCode: "usernameTaken", suggestion: body.detail.suggestion };
+    }
   } catch {
     // fall through to generic
   }
-  return "generic";
+  return { errorCode: "generic" };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -72,7 +82,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials: "include",
       body: JSON.stringify({ username, password }),
     });
-    if (!res.ok) return { ok: false, errorCode: "invalidCredentials" };
+    if (!res.ok) {
+      return {
+        ok: false,
+        errorCode: res.status === 429 ? "rateLimited" : "invalidCredentials",
+      };
+    }
     setUser(await res.json());
     return { ok: true };
   }
@@ -87,7 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials: "include",
       body: JSON.stringify({ username, password }),
     });
-    if (!res.ok) return { ok: false, errorCode: await registerErrorCode(res) };
+    if (!res.ok) {
+      const { errorCode, suggestion } = await registerErrorInfo(res);
+      return { ok: false, errorCode, suggestion };
+    }
     setUser(await res.json());
     return { ok: true };
   }
