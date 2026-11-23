@@ -40,6 +40,9 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|video/|projects/).*)",
+    // Also skips any static file under /public (anything with a file
+    // extension, e.g. /logo.png, /video/hero-poster.jpg), not just the
+    // specific paths listed here, so a session check never blocks an asset.
+    "/((?!api/|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\..*).*)",
   ],
 };

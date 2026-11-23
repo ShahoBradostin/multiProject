@@ -69,16 +69,6 @@ function BlueprintIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function SproutIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg {...iconProps(className)}>
-      <path d="M12 21v-9" />
-      <path d="M12 12C12 8 9 6 5 6c0 4 3 7 7 7" />
-      <path d="M12 12c0-3 2.5-5 6-5 0 3.5-2.5 6-6 6" />
-    </svg>
-  );
-}
-
 const PILLAR_KEYS = [
   {
     heading: "home.pillarFrontendHeading",
@@ -271,17 +261,6 @@ export default function Home() {
             </h2>
             <p className="text-muted">{t("home.moreProjectsBody")}</p>
           </div>
-        </FadeIn>
-      </section>
-
-      <section className="w-full bg-surface">
-        <FadeIn className="mx-auto flex max-w-5xl flex-col items-center gap-8 px-6 py-20 text-center sm:px-16">
-          <SproutIcon className="h-8 w-8 text-accent" />
-          <h2 className="font-serif text-3xl text-foreground">
-            {t("home.stillTakingShapeHeading")}
-          </h2>
-          <p className="max-w-2xl text-muted">{t("home.stillTakingShapeBody")}</p>
-          <ImagePlaceholder className="aspect-video w-full" />
         </FadeIn>
       </section>
     </div>

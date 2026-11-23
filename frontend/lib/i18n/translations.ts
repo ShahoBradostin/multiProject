@@ -18,7 +18,6 @@ const translations = {
     },
     footer: {
       rights: "All rights reserved.",
-      email: "Email",
       tagline: "A small collection of things I'm building.",
       projectsHeading: "Projects",
       socialHeading: "Social",
@@ -61,9 +60,6 @@ const translations = {
       moreProjectsHeading: "More Projects in the Works",
       moreProjectsBody:
         "The project grid above has a couple of open slots on purpose. This site grows the same way the skills behind it do, one project at a time, each one picked to explore something the last one didn't: a new part of the stack, or a different kind of problem to solve.",
-      stillTakingShapeHeading: "Still Taking Shape",
-      stillTakingShapeBody:
-        "This site keeps growing the same way the projects on it do: a little at a time, built to actually work rather than just look finished.",
     },
     board: {
       title: "Kanban Board",
@@ -199,6 +195,8 @@ const translations = {
       messagePlaceholder: "What's on your mind?",
       submit: "Send message",
       subject: "Message from {name}",
+      underConstructionHeading: "Under Construction",
+      underConstructionBody: "This page is still being put together. Check back soon.",
     },
     auth: {
       welcomeHeading: "Welcome",
@@ -251,7 +249,6 @@ const translations = {
     },
     footer: {
       rights: "Alla rättigheter förbehållna.",
-      email: "E-post",
       tagline: "En liten samling saker jag bygger.",
       projectsHeading: "Projekt",
       socialHeading: "Socialt",
@@ -294,9 +291,6 @@ const translations = {
       moreProjectsHeading: "Fler Projekt På Gång",
       moreProjectsBody:
         "Rutnätet med projekt ovanför har ett par lediga platser med flit. Den här sidan växer på samma sätt som kunskaperna bakom den, ett projekt i taget, där varje nytt projekt väljs för att utforska något det förra inte gjorde: en ny del av stacken, eller en annan typ av problem att lösa.",
-      stillTakingShapeHeading: "Fortfarande Under Uppbyggnad",
-      stillTakingShapeBody:
-        "Den här sidan fortsätter växa på samma sätt som projekten på den, lite i taget, byggd för att faktiskt fungera snarare än att bara se färdig ut.",
     },
     board: {
       title: "Kanban-tavla",
@@ -429,6 +423,8 @@ const translations = {
       messagePlaceholder: "Vad tänker du på?",
       submit: "Skicka meddelande",
       subject: "Meddelande från {name}",
+      underConstructionHeading: "Under Uppbyggnad",
+      underConstructionBody: "Den här sidan är inte klar än. Kom tillbaka snart.",
     },
     auth: {
       welcomeHeading: "Välkommen",

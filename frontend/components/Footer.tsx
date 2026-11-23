@@ -51,24 +51,22 @@ export default function Footer() {
             <span className="text-xs font-semibold uppercase tracking-wide text-muted">
               {t("footer.socialHeading")}
             </span>
-            <span
-              className="cursor-default text-sm text-muted opacity-70"
-              title="Placeholder link"
+            <a
+              href="https://github.com/ShahoBradostin"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted transition-colors hover:text-accent"
             >
               GitHub
-            </span>
-            <span
-              className="cursor-default text-sm text-muted opacity-70"
-              title="Placeholder link"
+            </a>
+            <a
+              href="https://www.linkedin.com/in/shahobradostin"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted transition-colors hover:text-accent"
             >
               LinkedIn
-            </span>
-            <span
-              className="cursor-default text-sm text-muted opacity-70"
-              title="Placeholder link"
-            >
-              {t("footer.email")}
-            </span>
+            </a>
           </div>
         </div>
 
